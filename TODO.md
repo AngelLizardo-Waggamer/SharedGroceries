@@ -6,11 +6,11 @@ Este documento es la hoja de ruta completa para el sistema de listas de compras.
 
 ## 🏗️ FASE 1: Base de Datos y Estructura de Identidad (PostgreSQL + EF Core)
 
-- [ ] **Esquema de Familias:**
-    - [ ] Tabla `Families`: `Id` (Guid), `Name` (String), `InviteCode` (String, único, 6-8 caracteres), `CreatedAt` (DateTime).
-- [ ] **Esquema de Usuarios:**
-    - [ ] Tabla `Users`: `Id`, `Username`, `PasswordHash`, `FamilyId` (Guid, Nullable al inicio).
-    - [ ] Lógica de `CurrentDeviceId` (Guid) para control de sesión única.
+- [x] **Esquema de Familias:**
+    - [x] Tabla `Families`: `Id` (Guid), `Name` (String), `InviteCode` (String, único, 6-8 caracteres), `CreatedAt` (DateTime).
+- [x] **Esquema de Usuarios:**
+    - [x] Tabla `Users`: `Id`, `Username`, `PasswordHash`, `FamilyId` (Guid, Nullable al inicio).
+    - [x] Lógica de `CurrentDeviceId` (Guid) para control de sesión única.
 - [ ] **Esquema de Listas:**
     - [ ] Tabla `ShoppingLists`: `Id`, `Name`, `CreatedAt`, `IsActive` (bool), `FamilyId` (Relación 1:N con Families).
 - [ ] **Esquema de Productos:**
