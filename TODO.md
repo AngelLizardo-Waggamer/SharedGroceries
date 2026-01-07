@@ -11,13 +11,13 @@ Este documento es la hoja de ruta completa para el sistema de listas de compras.
 - [x] **Esquema de Usuarios:**
     - [x] Tabla `Users`: `Id`, `Username`, `PasswordHash`, `FamilyId` (Guid, Nullable al inicio).
     - [x] Lógica de `CurrentDeviceId` (Guid) para control de sesión única.
-- [ ] **Esquema de Listas:**
-    - [ ] Tabla `ShoppingLists`: `Id`, `Name`, `CreatedAt`, `IsActive` (bool), `FamilyId` (Relación 1:N con Families).
-- [ ] **Esquema de Productos:**
-    - [ ] Tabla `Products`: `Id`, `Name`, `Quantity`, `Status` (Enum: Pending, InCart, Paid).
-    - [ ] Relaciones: `ListId`, `UpdatedAt` (Timestamp), `LastModifiedByUserId`.
-- [ ] **Esquema de Dispositivos:**
-    - [ ] Tabla `UserDevices`: Mapeo de `UserId` con `FCM_Token`.
+- [x] **Esquema de Listas:**
+    - [x] Tabla `ShoppingLists`: `Id`, `Name`, `CreatedAt`, `IsActive` (bool), `FamilyId` (Relación 1:N con Families).
+- [x] **Esquema de Productos:**
+    - [x] Tabla `Products`: `Id`, `Name`, `Quantity`, `Status` (Enum: Pending, InCart, Paid).
+    - [x] Relaciones: `ListId`, `UpdatedAt` (Timestamp), `LastModifiedByUserId`.
+- [x] **Esquema de Dispositivos:**
+    - [x] Tabla `UserDevices`: Mapeo de `UserId` con `FCM_Token`.
 
 ---
 
