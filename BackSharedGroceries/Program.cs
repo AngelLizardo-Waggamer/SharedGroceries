@@ -1,21 +1,18 @@
 using BackSharedGroceries.Data;
+using Data;
 using Microsoft.EntityFrameworkCore;
 
 var builder = WebApplication.CreateBuilder(args);
 
-// Add services to the container.
-
+// Base services configuration
 builder.Services.AddControllers();
-// Learn more about configuring Swagger/OpenAPI at https://aka.ms/aspnetcore/swashbuckle
 builder.Services.AddEndpointsApiExplorer();
 builder.Services.AddSwaggerGen();
 
-builder.Services.AddDbContext<AppDbContext>(options =>
-{
-    options.UseNpgsql(Environment.GetEnvironmentVariable("DB_CN_STR") 
-        ?? builder.Configuration.GetConnectionString("DefaultConnection"));
-});
+// DbContext configuration
+builder.Services.ConfigureDbContext(builder.Configuration);
 
+// App building
 var app = builder.Build();
 
 // Configure the HTTP request pipeline.
