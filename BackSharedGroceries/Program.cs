@@ -1,6 +1,4 @@
-using BackSharedGroceries.Data;
 using Data;
-using Microsoft.EntityFrameworkCore;
 
 var builder = WebApplication.CreateBuilder(args);
 
@@ -14,6 +12,12 @@ builder.Services.ConfigureDbContext(builder.Configuration);
 
 // App building
 var app = builder.Build();
+
+// Apply Db migrations at startup
+using (var scope = app.Services.CreateScope())
+{
+    scope.ApplyMigrationsToDb();
+}
 
 // Configure the HTTP request pipeline.
 if (app.Environment.IsDevelopment())

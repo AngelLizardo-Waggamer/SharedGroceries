@@ -22,5 +22,35 @@ namespace Data
                     ?? configuration.GetConnectionString("DefaultConnection"));
             });
         }
+
+        /// <summary>
+        /// Applies any pending migrations to the database. If the database does not exists, it will be created. Also, if the database already has the latest migration, no action is taken.
+        /// It also catches correctly common exceptions and has a general exception handler that stops the application preventing it from running in an inconsistent state.
+        /// </summary>
+        /// <param name="scope"></param>
+        /// <exception cref="InvalidOperationException"></exception>
+        public static void ApplyMigrationsToDb(this IServiceScope scope)
+        {
+            try
+            {
+                var dbContext = scope.ServiceProvider.GetRequiredService<AppDbContext>();
+                dbContext.Database.Migrate();
+            }
+            catch (Npgsql.NpgsqlException ex)
+            {
+                throw new InvalidOperationException("Failed to establish a connection to the database. Ensure that the connection string is defined correctly and that Db is running.",
+                ex);
+            }
+            catch (DbUpdateException ex)
+            {
+                throw new InvalidOperationException(
+                "Failed to apply database migrations. The database may be in an inconsistent state.", 
+                ex);
+            }
+            catch (Exception ex)
+            {
+                throw new InvalidOperationException("An unexpected error occurred while applying database migrations.", ex);
+            }
+        }
     }
 }
