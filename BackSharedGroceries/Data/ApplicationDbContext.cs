@@ -13,6 +13,7 @@ namespace BackSharedGroceries.Data
         public DbSet<ShoppingList> ShoppingLists { get; set; }
         public DbSet<Product> Products { get; set; }
         public DbSet<UserDevice> UserDevices { get; set; }
+        public DbSet<RefreshToken> RefreshTokens { get; set; }
 
         protected override void OnModelCreating(ModelBuilder modelBuilder)
         {

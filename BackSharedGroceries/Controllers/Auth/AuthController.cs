@@ -3,6 +3,7 @@ using BackSharedGroceries.Data.DTOs;
 using Microsoft.AspNetCore.Mvc;
 using BackSharedGroceries.Models;
 using Microsoft.EntityFrameworkCore;
+using System.Security.Cryptography;
 
 namespace BackSharedGroceries.Controllers.Auth
 {
@@ -60,6 +61,7 @@ namespace BackSharedGroceries.Controllers.Auth
             return Ok("User registered successfully.");
         }
 
+        [HttpPost("login")]
         public async Task<IActionResult> Login([FromBody] LoginRequest request)
         {
             // If the model is not valid, which means that required fields are missing or the data is not valid, return a BadRequest.
@@ -92,6 +94,21 @@ namespace BackSharedGroceries.Controllers.Auth
             // Generate a Guid for the device in which the user is loggin in
             user.CurrentDeviceId = Guid.NewGuid();
 
+            // Clean old refresh tokens for the user
+            List<RefreshToken> oldTokens = await _context.RefreshTokens.Where(t => t.UserId == user.Id).ToListAsync();
+            _context.RefreshTokens.RemoveRange(oldTokens);
+
+            // Generate new refresh token for the user
+            RefreshToken newRefreshToken = new()
+            {
+              Token = Convert.ToBase64String(RandomNumberGenerator.GetBytes(64)),
+              ExpiresAt = DateTime.UtcNow.AddYears(1),
+              UserId = user.Id  
+            };
+
+            // Add the new refresh token to the database
+            _context.RefreshTokens.Add(newRefreshToken);
+
             // Save the changes to the database and commit the transaction.
             await _context.SaveChangesAsync();
             await transaction.CommitAsync();
@@ -106,8 +123,54 @@ namespace BackSharedGroceries.Controllers.Auth
             return Ok(new
             {
                 Token = token,
+                RefreshToken = newRefreshToken.Token,
                 user.FamilyId, // Inferred Name = FamilyId
                 user.Username // Inferred Name = Username
+            });
+        }
+
+        [HttpPost("refresh")]
+        public async Task<IActionResult> Refresh([FromBody] RefreshRequest request)
+        {
+
+            // Evaluate the model state. If the data was not sent correctly return a BadRequest.
+            // As in login endpoint, do not return the model state details unless in development environment.
+            if (!ModelState.IsValid)
+            {
+                if (_env.IsDevelopment())
+                {
+                    return BadRequest(ModelState);
+                } else
+                {
+                    return BadRequest("Invalid credentials.");    
+                }
+            }
+
+            // Search for the refresh token in the database
+            RefreshToken? existingToken = await _context.RefreshTokens
+                .Include(t => t.User)
+                .FirstOrDefaultAsync(t => t.Token == request.RefreshToken);
+
+            // Validate that the token exists, that is not revoked and not expired
+            if (existingToken == null || existingToken.IsRevoked || existingToken.ExpiresAt <= DateTime.UtcNow)
+            {
+                return Unauthorized("Invalid or expired session. Please log in again.");
+            }
+
+            // Other thing that is primordial to check is whether the user has a current device ID assigned.
+            if (existingToken.User.CurrentDeviceId == null)
+            {
+                return Unauthorized("Invalid session state. Please log in again.");
+            }
+
+            // At this point, the refresh token is valid, so proceed to generate a new JWT token for the user.
+            string newToken = JWTHandler.GenerateToken(existingToken.User);
+
+            // Return the new token to the user
+            return Ok(new
+            {
+                Token = newToken,
+                RefreshToken = existingToken.Token
             });
         }
     }

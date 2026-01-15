@@ -12,8 +12,8 @@ using Npgsql.EntityFrameworkCore.PostgreSQL.Metadata;
 namespace BackSharedGroceries.Migrations
 {
     [DbContext(typeof(AppDbContext))]
-    [Migration("20260107011019_Migracion base")]
-    partial class Migracionbase
+    [Migration("20260115033515_InitialMigration")]
+    partial class InitialMigration
     {
         /// <inheritdoc />
         protected override void BuildTargetModel(ModelBuilder modelBuilder)
@@ -104,6 +104,35 @@ namespace BackSharedGroceries.Migrations
                         .HasDatabaseName("idx_products_updated_at");
 
                     b.ToTable("Products");
+                });
+
+            modelBuilder.Entity("BackSharedGroceries.Models.RefreshToken", b =>
+                {
+                    b.Property<Guid>("Id")
+                        .ValueGeneratedOnAdd()
+                        .HasColumnType("uuid");
+
+                    b.Property<DateTime>("CreatedAt")
+                        .HasColumnType("timestamp with time zone");
+
+                    b.Property<DateTime>("ExpiresAt")
+                        .HasColumnType("timestamp with time zone");
+
+                    b.Property<bool>("IsRevoked")
+                        .HasColumnType("boolean");
+
+                    b.Property<string>("Token")
+                        .IsRequired()
+                        .HasColumnType("text");
+
+                    b.Property<Guid>("UserId")
+                        .HasColumnType("uuid");
+
+                    b.HasKey("Id");
+
+                    b.HasIndex("UserId");
+
+                    b.ToTable("RefreshTokens");
                 });
 
             modelBuilder.Entity("BackSharedGroceries.Models.ShoppingList", b =>
@@ -215,6 +244,17 @@ namespace BackSharedGroceries.Migrations
                     b.Navigation("LastModifiedByUser");
 
                     b.Navigation("List");
+                });
+
+            modelBuilder.Entity("BackSharedGroceries.Models.RefreshToken", b =>
+                {
+                    b.HasOne("BackSharedGroceries.Models.User", "User")
+                        .WithMany()
+                        .HasForeignKey("UserId")
+                        .OnDelete(DeleteBehavior.Cascade)
+                        .IsRequired();
+
+                    b.Navigation("User");
                 });
 
             modelBuilder.Entity("BackSharedGroceries.Models.ShoppingList", b =>

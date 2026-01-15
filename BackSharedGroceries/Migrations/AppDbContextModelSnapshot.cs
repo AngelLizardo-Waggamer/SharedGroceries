@@ -103,6 +103,35 @@ namespace BackSharedGroceries.Migrations
                     b.ToTable("Products");
                 });
 
+            modelBuilder.Entity("BackSharedGroceries.Models.RefreshToken", b =>
+                {
+                    b.Property<Guid>("Id")
+                        .ValueGeneratedOnAdd()
+                        .HasColumnType("uuid");
+
+                    b.Property<DateTime>("CreatedAt")
+                        .HasColumnType("timestamp with time zone");
+
+                    b.Property<DateTime>("ExpiresAt")
+                        .HasColumnType("timestamp with time zone");
+
+                    b.Property<bool>("IsRevoked")
+                        .HasColumnType("boolean");
+
+                    b.Property<string>("Token")
+                        .IsRequired()
+                        .HasColumnType("text");
+
+                    b.Property<Guid>("UserId")
+                        .HasColumnType("uuid");
+
+                    b.HasKey("Id");
+
+                    b.HasIndex("UserId");
+
+                    b.ToTable("RefreshTokens");
+                });
+
             modelBuilder.Entity("BackSharedGroceries.Models.ShoppingList", b =>
                 {
                     b.Property<Guid>("Id")
@@ -212,6 +241,17 @@ namespace BackSharedGroceries.Migrations
                     b.Navigation("LastModifiedByUser");
 
                     b.Navigation("List");
+                });
+
+            modelBuilder.Entity("BackSharedGroceries.Models.RefreshToken", b =>
+                {
+                    b.HasOne("BackSharedGroceries.Models.User", "User")
+                        .WithMany()
+                        .HasForeignKey("UserId")
+                        .OnDelete(DeleteBehavior.Cascade)
+                        .IsRequired();
+
+                    b.Navigation("User");
                 });
 
             modelBuilder.Entity("BackSharedGroceries.Models.ShoppingList", b =>

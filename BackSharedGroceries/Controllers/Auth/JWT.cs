@@ -47,7 +47,7 @@ namespace BackSharedGroceries.Controllers.Auth
                 issuer: JwtConstants.Issuer,
                 audience: JwtConstants.Audience,
                 claims: claims,
-                expires: DateTime.Now.AddYears(1),
+                expires: DateTime.Now.AddHours(24),
                 signingCredentials: creds
             );
 
