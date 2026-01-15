@@ -1,3 +1,4 @@
+using BackSharedGroceries.Middlewares;
 using Data;
 
 var builder = WebApplication.CreateBuilder(args);
@@ -27,8 +28,9 @@ if (app.Environment.IsDevelopment())
 }
 
 app.UseHttpsRedirection();
-
+app.UseAuthentication();
 app.UseAuthorization();
+app.UseMiddleware<DeviceSessionMiddleware>();
 
 app.MapControllers();
 
