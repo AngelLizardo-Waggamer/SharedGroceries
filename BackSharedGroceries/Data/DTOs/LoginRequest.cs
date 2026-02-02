@@ -5,12 +5,20 @@ namespace BackSharedGroceries.Data.DTOs
     /// <summary>
     /// DTO for user login request.
     /// </summary>
-    /// <param name="Username"></param>
-    /// <param name="Password"></param>
-    public record LoginRequest(
+    public class LoginRequest{
+
+        /// <summary>
+        /// Username of the user trying to log in.
+        /// </summary>
+        /// <example>demo_user</example>
         [Required]
-        string Username,
+        public required string Username { get; init; }
+
+        /// <summary>
+        /// Password of the user trying to log in.
+        /// </summary>
+        /// <example>Admin.12345</example>
         [Required]
-        string Password
-    );
+        public required string Password { get; init; }
+    }
 }

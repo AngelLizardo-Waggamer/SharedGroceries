@@ -4,6 +4,7 @@ using Microsoft.AspNetCore.Mvc;
 using BackSharedGroceries.Models;
 using Microsoft.EntityFrameworkCore;
 using System.Security.Cryptography;
+using Microsoft.AspNetCore.Authorization;
 
 namespace BackSharedGroceries.Controllers.Auth
 {
@@ -16,17 +17,26 @@ namespace BackSharedGroceries.Controllers.Auth
         private readonly IWebHostEnvironment _env = env;
 
         /// <summary>
-        /// Endpoint to register a new user in the system. Requires an object within the body containing the information of RegisterRequest.
+        /// Registers a new user in the system.
         /// </summary>
-        /// <param name="request"></param>
-        /// <returns></returns>
-        [HttpPost("register")]
+        /// <param name="request">Registry data (Username and Password)</param>
+        /// <returns>Confirmation of registry creation</returns>
+        /// <response code="200">The user was registered successfully.</response>
+        /// <response code="400">The data sent is not valid</response>
+        /// <response code="409">The username is already in use.</response>
+        [HttpPost("v1/register")]
         public async Task<IActionResult> Register([FromBody] RegisterRequest request)
         {
             // If the model is not valid, which means that required fields are missing or the data is not valid, return a BadRequest with the model state details.
             if (!ModelState.IsValid)
             {
-                return BadRequest(ModelState);
+                if (_env.IsDevelopment())
+                {
+                    return BadRequest(ModelState);
+                } else
+                {
+                    return BadRequest("Invalid registering data.");
+                }
             }
 
             // Declare the user variable, which will be used later IF the user does not exist.
@@ -61,7 +71,15 @@ namespace BackSharedGroceries.Controllers.Auth
             return Ok("User registered successfully.");
         }
 
-        [HttpPost("login")]
+        /// <summary>
+        /// Authenticates a user and generates a JWT token along with a refresh token.
+        /// </summary>
+        /// <param name="request">Login data (Username and Password)</param>
+        /// <returns>JWT token and refresh token</returns>
+        /// <response code="200">The user was authenticated successfully.</response>
+        /// <response code="400">The data sent is not valid</response>
+        /// <response code="401">The credentials provided are invalid.</response>
+        [HttpPost("v1/login")]
         public async Task<IActionResult> Login([FromBody] LoginRequest request)
         {
             // If the model is not valid, which means that required fields are missing or the data is not valid, return a BadRequest.
@@ -129,7 +147,15 @@ namespace BackSharedGroceries.Controllers.Auth
             });
         }
 
-        [HttpPost("refresh")]
+        /// <summary>
+        /// Refreshes a JWT token using a valid refresh token.
+        /// </summary>
+        /// <param name="request">Refresh token data</param>
+        /// <returns>New JWT token and refresh token</returns>
+        /// <response code="200">The token was refreshed successfully.</response>
+        /// <response code="400">The data sent is not valid</response>
+        /// <response code="401">The refresh token is invalid or expired.</response>
+        [HttpPost("v1/refresh")]
         public async Task<IActionResult> Refresh([FromBody] RefreshRequest request)
         {
 

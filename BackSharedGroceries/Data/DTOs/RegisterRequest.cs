@@ -4,14 +4,21 @@ namespace BackSharedGroceries.Data.DTOs
 {
     /// <summary>
     /// DTO for user registration request. 
-    /// When a new user is created, it will not have a family associated, so the only required fields are the username and the password.
     /// </summary>
-    /// <param name="Username"></param>
-    /// <param name="Password"></param>
-    public record RegisterRequest(
+    public class RegisterRequest
+    {
+        /// <summary>
+        /// Username of the new user. Must be unique.
+        /// </summary>
+        /// <example>demo_user</example>
         [Required]
-        string Username,
+        public required string Username { get; init; }
+
+        /// <summary>
+        /// Password of the new user.
+        /// </summary>
+        /// <example>Admin.12345</example>
         [Required]
-        string Password
-    );
+        public required string Password { get; init; }
+    }
 }

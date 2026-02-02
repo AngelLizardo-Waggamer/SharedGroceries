@@ -5,9 +5,13 @@ namespace BackSharedGroceries.Data.DTOs
     /// <summary>
     /// DTO for refresh token request.
     /// </summary>
-    /// <param name="RefreshToken"></param>
-    public record RefreshRequest(
+    public class RefreshRequest
+    {
+        /// <summary>
+        /// The current stored refresh token in the device.
+        /// </summary>
+        /// <example>token...</example>
         [Required]
-        string RefreshToken
-    );
+        public required string RefreshToken {get; init;}
+    }
 }

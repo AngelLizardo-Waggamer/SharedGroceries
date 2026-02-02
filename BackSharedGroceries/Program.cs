@@ -1,12 +1,26 @@
 using BackSharedGroceries.Middlewares;
 using Data;
+using Microsoft.OpenApi;
 
 var builder = WebApplication.CreateBuilder(args);
 
 // Base services configuration
 builder.Services.AddControllers();
 builder.Services.AddEndpointsApiExplorer();
-builder.Services.AddSwaggerGen();
+builder.Services.AddSwaggerGen(options =>
+{
+    options.SwaggerDoc("v1", new OpenApiInfo
+    {
+        Title = "SharedGroceries API",
+        Version = "v1",
+        Description = "API for managing shared grocery lists and family shopping"
+    });
+
+    // Enable XML comments for Swagger documentation
+    var xmlFile = $"{System.Reflection.Assembly.GetExecutingAssembly().GetName().Name}.xml";
+    var xmlPath = Path.Combine(AppContext.BaseDirectory, xmlFile);
+    options.IncludeXmlComments(xmlPath);
+});
 
 // DbContext configuration
 builder.Services.ConfigureDbContext(builder.Configuration);
@@ -24,7 +38,10 @@ using (var scope = app.Services.CreateScope())
 if (app.Environment.IsDevelopment())
 {
     app.UseSwagger();
-    app.UseSwaggerUI();
+    app.UseSwaggerUI(options =>
+    {
+        options.DefaultModelsExpandDepth(-1); // Hide schemas section
+    });
 }
 
 app.UseHttpsRedirection();
