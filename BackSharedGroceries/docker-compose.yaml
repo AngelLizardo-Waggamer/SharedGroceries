@@ -1,0 +1,49 @@
+services:
+  db:
+    image: postgres:alpine3.23
+    container_name: sharedgroceries-db
+    restart: unless-stopped
+    environment:
+      POSTGRES_USER: ${POSTGRES_USER}
+      POSTGRES_PASSWORD: ${POSTGRES_PASSWORD}
+      POSTGRES_DB: ${POSTGRES_DB}
+    ports:
+      - "${POSTGRES_PORT:-5432}:5432"
+    volumes:
+      - postgres_data:/var/lib/postgresql/data
+    healthcheck:
+      test: ["CMD-SHELL", "pg_isready -U ${POSTGRES_USER} -d ${POSTGRES_DB}"]
+      interval: 10s
+      timeout: 5s
+      retries: 5
+    networks:
+      - sharedgroceries-network
+
+  backend:
+    build:
+      context: .
+      dockerfile: Dockerfile
+    container_name: sharedgroceries-backend
+    restart: unless-stopped
+    environment:
+      - ASPNETCORE_ENVIRONMENT=${ASPNETCORE_ENVIRONMENT:-Development}
+      - ASPNETCORE_URLS=http://+:8080
+      - DB_CN_STR=${DB_CN_STR}
+      - JWT_KEY=${JWT_KEY}
+      - JWT_ISSUER=${JWT_ISSUER}
+      - JWT_AUDIENCE=${JWT_AUDIENCE}
+    ports:
+      - "${BACKEND_PORT:-5000}:8080"
+    depends_on:
+      db:
+        condition: service_healthy
+    networks:
+      - sharedgroceries-network
+
+volumes:
+  postgres_data:
+    driver: local
+
+networks:
+  sharedgroceries-network:
+    driver: bridge
