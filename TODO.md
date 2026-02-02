@@ -23,9 +23,9 @@ Este documento es la hoja de ruta completa para el sistema de listas de compras.
 
 ## ⚙️ FASE 2: Back-end - Gestión de Familias y Auth (C# .NET 8)
 
-- [ ] **Autenticación Base:**
-    - [ ] Endpoint de Registro/Login de usuario individual.
-    - [ ] Middleware de validación de JWT con validación de `DeviceId`.
+- [x] **Autenticación Base:**
+    - [x] Endpoint de Registro/Login de usuario individual.
+    - [x] Middleware de validación de JWT con validación de `DeviceId`.
 - [ ] **Gestión de Onboarding Familiar:**
     - [ ] Generador de códigos de invitación (Lógica para crear strings aleatorios únicos de 6 caracteres).
     - [ ] Endpoint `POST /families/create`: Crea la familia y asigna automáticamente al creador.
