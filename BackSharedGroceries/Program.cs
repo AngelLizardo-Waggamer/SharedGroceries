@@ -9,11 +9,11 @@ builder.Services.AddControllers();
 builder.Services.AddEndpointsApiExplorer();
 builder.Services.AddSwaggerGen(options =>
 {
-    options.SwaggerDoc("v1", new OpenApiInfo
+    options.SwaggerDoc(SwaggerOptions.APIVersion, new OpenApiInfo
     {
-        Title = "SharedGroceries API",
-        Version = "v1",
-        Description = "API for managing shared grocery lists and family shopping"
+        Title = SwaggerOptions.Title,
+        Version = SwaggerOptions.APIVersion,
+        Description = SwaggerOptions.Description
     });
 
     // Enable XML comments for Swagger documentation
