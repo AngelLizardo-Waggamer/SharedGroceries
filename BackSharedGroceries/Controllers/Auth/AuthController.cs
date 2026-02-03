@@ -1,20 +1,30 @@
-using BackSharedGroceries.Data;
-using BackSharedGroceries.Data.DTOs;
+using BackSharedGroceries.DTOs;
+using BackSharedGroceries.Interfaces.Services;
 using Microsoft.AspNetCore.Mvc;
-using BackSharedGroceries.Models;
-using Microsoft.EntityFrameworkCore;
-using System.Security.Cryptography;
-using Microsoft.AspNetCore.Authorization;
 
 namespace BackSharedGroceries.Controllers.Auth
 {
+    /// <summary>
+    /// Controller responsible for authentication endpoints.
+    /// Handles user registration, login, and token refresh operations.
+    /// </summary>
     [ApiController]
     [Route("api/auth")]
-    public class AuthController(AppDbContext context, ILogger<AuthController> logger, IWebHostEnvironment env) : ControllerBase
+    public class AuthController : ControllerBase
     {
-        private readonly AppDbContext _context = context;
-        private readonly ILogger<AuthController> _logger = logger;
-        private readonly IWebHostEnvironment _env = env;
+        private readonly IAuthService _authService;
+        private readonly IWebHostEnvironment _env;
+
+        /// <summary>
+        /// Initializes a new instance of the AuthController class.
+        /// </summary>
+        /// <param name="authService">Service for handling authentication business logic.</param>
+        /// <param name="env">Web host environment to determine if running in development mode.</param>
+        public AuthController(IAuthService authService, IWebHostEnvironment env)
+        {
+            _authService = authService;
+            _env = env;
+        }
 
         /// <summary>
         /// Registers a new user in the system.
@@ -27,48 +37,28 @@ namespace BackSharedGroceries.Controllers.Auth
         [HttpPost("v1/register")]
         public async Task<IActionResult> Register([FromBody] RegisterRequest request)
         {
-            // If the model is not valid, which means that required fields are missing or the data is not valid, return a BadRequest with the model state details.
+            // Validate that the request contains all required fields
+            // In development, return detailed validation errors; in production, return generic message for security
             if (!ModelState.IsValid)
             {
                 if (_env.IsDevelopment())
                 {
                     return BadRequest(ModelState);
-                } else
-                {
-                    return BadRequest("Invalid registering data.");
                 }
+                return BadRequest("Invalid registering data.");
             }
 
-            // Declare the user variable, which will be used later IF the user does not exist.
-            User? user = await _context.Users.FindAsync(request.Username);
+            // Delegate registration logic to the service layer
+            var result = await _authService.RegisterAsync(request);
 
-            // If the user already exists, which means that the value of user is not null, return a conflict response.
-            if (user != null)
+            // Map ServiceResult to appropriate HTTP status code using pattern matching
+            // This ensures proper REST semantics are followed
+            return result.ResultType switch
             {
-                return Conflict("User already exists.");
-            }
-
-            // Start a transaction to ensure data integrity during the user creation.
-            using var transaction = await _context.Database.BeginTransactionAsync();
-
-            // At this point, the user is confirmed to not exist, so a new user object is created with the data provided in the request.
-            user = new User
-            {
-                Username = request.Username,
-                PasswordHash = BCrypt.Net.BCrypt.HashPassword(request.Password)
+                Common.ServiceResultType.Conflict => Conflict(result.ErrorMessage),      // 409 if username exists
+                Common.ServiceResultType.BadRequest => BadRequest(result.ErrorMessage),   // 400 for invalid data
+                _ => Ok("User registered successfully.")                                   // 200 for success
             };
-
-            // Add the new user to the database
-            _context.Users.Add(user);
-
-            // Save the changes to the database and commit the transaction.
-            await _context.SaveChangesAsync();
-            await transaction.CommitAsync();
-
-            // Log the successful creation of the user.
-            _logger.LogInformation("New user registered: {Username}", user.Username);
-
-            return Ok("User registered successfully.");
         }
 
         /// <summary>
@@ -82,69 +72,29 @@ namespace BackSharedGroceries.Controllers.Auth
         [HttpPost("v1/login")]
         public async Task<IActionResult> Login([FromBody] LoginRequest request)
         {
-            // If the model is not valid, which means that required fields are missing or the data is not valid, return a BadRequest.
-            // In this case, because it is a login, the model state details are not returned to avoid leaking information. Instead, a general message is provided.
-            // BUT, if the environment is development, return the model state for better bug tracking.
+            // Validate request data
+            // In production, return generic "Invalid credentials" to avoid information leakage about what's wrong
             if (!ModelState.IsValid)
             {
                 if (_env.IsDevelopment())
                 {
                     return BadRequest(ModelState);
-                } else
-                {
-                    return BadRequest("Invalid credentials.");    
                 }
+                return BadRequest("Invalid credentials.");
             }
 
-            // Declare the user variable that will contain the user data IF the user exists.
-            User? user = await _context.Users
-                .FirstOrDefaultAsync(u => u.Username == request.Username);
+            // Delegate authentication logic to the service layer
+            var result = await _authService.LoginAsync(request);
 
-            // If the user does not exist or the password does not match, return an Unauthorized response.
-            if (user == null || !BCrypt.Net.BCrypt.Verify(request.Password, user.PasswordHash))
+            // Map ServiceResult to appropriate HTTP status code
+            // Returns JWT and refresh token on success, or appropriate error code on failure
+            return result.ResultType switch
             {
-                return Unauthorized("Invalid credentials.");
-            }
-
-            // Start a transaction to ensure data integrity during the login process.
-            using var transaction = await _context.Database.BeginTransactionAsync();
-
-            // Generate a Guid for the device in which the user is loggin in
-            user.CurrentDeviceId = Guid.NewGuid();
-
-            // Clean old refresh tokens for the user
-            List<RefreshToken> oldTokens = await _context.RefreshTokens.Where(t => t.UserId == user.Id).ToListAsync();
-            _context.RefreshTokens.RemoveRange(oldTokens);
-
-            // Generate new refresh token for the user
-            RefreshToken newRefreshToken = new()
-            {
-              Token = Convert.ToBase64String(RandomNumberGenerator.GetBytes(64)),
-              ExpiresAt = DateTime.UtcNow.AddYears(1),
-              UserId = user.Id  
+                Common.ServiceResultType.Unauthorized => Unauthorized(result.ErrorMessage), // 401 for invalid credentials
+                Common.ServiceResultType.BadRequest => BadRequest(result.ErrorMessage),      // 400 for malformed request
+                Common.ServiceResultType.NotFound => NotFound(result.ErrorMessage),          // 404 if needed
+                _ => Ok(result.Data)                                                         // 200 with tokens on success
             };
-
-            // Add the new refresh token to the database
-            _context.RefreshTokens.Add(newRefreshToken);
-
-            // Save the changes to the database and commit the transaction.
-            await _context.SaveChangesAsync();
-            await transaction.CommitAsync();
-
-            // Log the successful login of the user.
-            _logger.LogInformation("User logged in: {Username}", user.Username);
-            
-            // Generate the JWT for the user.
-            string token = JWTHandler.GenerateToken(user);
-
-            // Return the token to the user.
-            return Ok(new
-            {
-                Token = token,
-                RefreshToken = newRefreshToken.Token,
-                user.FamilyId, // Inferred Name = FamilyId
-                user.Username // Inferred Name = Username
-            });
         }
 
         /// <summary>
@@ -158,46 +108,28 @@ namespace BackSharedGroceries.Controllers.Auth
         [HttpPost("v1/refresh")]
         public async Task<IActionResult> Refresh([FromBody] RefreshRequest request)
         {
-
-            // Evaluate the model state. If the data was not sent correctly return a BadRequest.
-            // As in login endpoint, do not return the model state details unless in development environment.
+            // Validate that the refresh token was provided in the request
             if (!ModelState.IsValid)
             {
                 if (_env.IsDevelopment())
                 {
                     return BadRequest(ModelState);
-                } else
-                {
-                    return BadRequest("Invalid credentials.");    
                 }
+                return BadRequest("Invalid credentials.");
             }
 
-            // Search for the refresh token in the database
-            RefreshToken? existingToken = await _context.RefreshTokens
-                .Include(t => t.User)
-                .FirstOrDefaultAsync(t => t.Token == request.RefreshToken);
-
-            // Validate that the token exists, that is not revoked and not expired
-            if (existingToken == null || existingToken.IsRevoked || existingToken.ExpiresAt <= DateTime.UtcNow)
+            // Delegate token refresh logic to the service layer
+            var result = await _authService.RefreshTokenAsync(request);
+            
+            // Map ServiceResult to appropriate HTTP status code
+            // Returns new JWT token on success, or error if refresh token is invalid/expired
+            return result.ResultType switch
             {
-                return Unauthorized("Invalid or expired session. Please log in again.");
-            }
-
-            // Other thing that is primordial to check is whether the user has a current device ID assigned.
-            if (existingToken.User.CurrentDeviceId == null)
-            {
-                return Unauthorized("Invalid session state. Please log in again.");
-            }
-
-            // At this point, the refresh token is valid, so proceed to generate a new JWT token for the user.
-            string newToken = JWTHandler.GenerateToken(existingToken.User);
-
-            // Return the new token to the user
-            return Ok(new
-            {
-                Token = newToken,
-                RefreshToken = existingToken.Token
-            });
+                Common.ServiceResultType.Unauthorized => Unauthorized(result.ErrorMessage), // 401 for invalid/expired token
+                Common.ServiceResultType.BadRequest => BadRequest(result.ErrorMessage),      // 400 for malformed request
+                Common.ServiceResultType.NotFound => NotFound(result.ErrorMessage),          // 404 if needed
+                _ => Ok(result.Data)                                                         // 200 with new JWT on success
+            };
         }
     }
 }

@@ -1,4 +1,4 @@
-namespace BackSharedGroceries.Controllers.Auth
+namespace BackSharedGroceries.Helpers.JWT
 {
     /// <summary>
     /// Static class that contains entities for the JWT configuration retrieved from environment variables.

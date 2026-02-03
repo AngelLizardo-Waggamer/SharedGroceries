@@ -1,6 +1,6 @@
 using System.ComponentModel.DataAnnotations;
 
-namespace BackSharedGroceries.Data.DTOs
+namespace BackSharedGroceries.DTOs
 {
     /// <summary>
     /// DTO for refresh token request.
