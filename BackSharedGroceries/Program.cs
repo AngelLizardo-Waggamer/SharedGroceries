@@ -2,6 +2,7 @@ using BackSharedGroceries.Middlewares;
 using Data;
 using Microsoft.OpenApi;
 using BackSharedGroceries.Interfaces;
+using BackSharedGroceries.Controllers.Auth;
 
 var builder = WebApplication.CreateBuilder(args);
 
@@ -25,6 +26,9 @@ builder.Services.AddSwaggerGen(options =>
 
 // DbContext configuration
 builder.Services.ConfigureDbContext(builder.Configuration);
+
+// JWT Authentication configuration
+builder.Services.ConfigureJWTAuth();
 
 // Services and Repositories configuration
 builder.Services.ConfigureInterfaces();
