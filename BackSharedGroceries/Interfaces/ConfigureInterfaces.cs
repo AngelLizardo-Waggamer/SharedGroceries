@@ -1,3 +1,4 @@
+using BackSharedGroceries.Helpers;
 using BackSharedGroceries.Interfaces.Repositories;
 using BackSharedGroceries.Interfaces.Services;
 using BackSharedGroceries.Repositories;
@@ -20,9 +21,14 @@ namespace BackSharedGroceries.Interfaces
             // Register repositories
             services.AddScoped<IUserRepository, UserRepository>();
             services.AddScoped<IRefreshTokenRepository, RefreshTokenRepository>();
+            services.AddScoped<IFamilyRepository, FamilyRepository>();
 
             // Register services
             services.AddScoped<IAuthService, AuthService>();
+            services.AddScoped<IFamilyService, FamilyService>();
+
+            // Register Helpers
+            services.AddScoped<IFamilyInviteCodeGenerator, FamilyInviteCodeGenerator>();
         }
     }
 }
