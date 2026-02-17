@@ -1,4 +1,5 @@
 using Microsoft.OpenApi;
+using BackSharedGroceries.Filters;
 
 public static class SwaggerOptions
 {
@@ -23,6 +24,19 @@ public static class SwaggerOptions
             var xmlFile = $"{System.Reflection.Assembly.GetExecutingAssembly().GetName().Name}.xml";
             var xmlPath = Path.Combine(AppContext.BaseDirectory, xmlFile);
             options.IncludeXmlComments(xmlPath);
+
+            options.AddSecurityDefinition("bearer", new OpenApiSecurityScheme
+            {
+                In = ParameterLocation.Header,
+                Description = "Please enter a valid token",
+                Name = "Authorization",
+                Type = SecuritySchemeType.Http,
+                Scheme = "bearer",
+                BearerFormat = "JWT"
+            });
+
+            // Use operation filter to apply security only to endpoints with [Authorize]
+            options.OperationFilter<AuthorizeOperationFilter>();
         });
     }
 }
