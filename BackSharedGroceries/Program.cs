@@ -19,6 +19,9 @@ builder.Services.ConfigureJWTAuth();
 // Services and Repositories configuration
 builder.Services.ConfigureInterfaces();
 
+// Configure HTTPContextAccessor
+builder.Services.AddHttpContextAccessor();
+
 // App building
 var app = builder.Build();
 
