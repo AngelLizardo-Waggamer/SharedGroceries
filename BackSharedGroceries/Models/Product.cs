@@ -26,7 +26,10 @@ namespace BackSharedGroceries.Models
         [ForeignKey(nameof(LastModifiedByUserId))]
         public User? LastModifiedByUser { get; set; }
         
-        [ConcurrencyCheck]
+        [Required]
+        [Column("client_timestamp")]
+        public DateTime ClientTimestamp { get; set; } = DateTime.UtcNow;
+        
         [Column("updated_at")]
         public DateTime UpdatedAt { get; set; } = DateTime.UtcNow;
 
