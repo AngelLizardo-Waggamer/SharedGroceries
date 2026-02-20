@@ -12,6 +12,16 @@
   </PropertyGroup>
 
   <ItemGroup>
+    <InternalsVisibleTo Include="BackSharedGroceries.Tests" />
+  </ItemGroup>
+
+  <ItemGroup>
+    <Compile Remove="BackSharedGroceries.Tests\**" />
+    <EmbeddedResource Remove="BackSharedGroceries.Tests\**" />
+    <None Remove="BackSharedGroceries.Tests\**" />
+  </ItemGroup>
+
+  <ItemGroup>
     <PackageReference Include="BCrypt.Net-Next" Version="4.0.3" />
     <PackageReference Include="Microsoft.AspNetCore.Authentication.JwtBearer" Version="8.0.23" />
     <PackageReference Include="Microsoft.EntityFrameworkCore" Version="9.0.11" />
