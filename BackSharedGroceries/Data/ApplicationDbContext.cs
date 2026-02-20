@@ -86,7 +86,7 @@ namespace BackSharedGroceries.Data
         private void UpdateTimestamps()
         {
             var entries = ChangeTracker.Entries()
-                .Where(e => e.Entity is Product && e.State == EntityState.Modified);
+                .Where(e => e.Entity is Product && (e.State == EntityState.Added || e.State == EntityState.Modified));
 
             foreach (var entry in entries)
             {
