@@ -47,6 +47,13 @@ namespace BackSharedGroceries.Services
             {
                 return ServiceResult<FamilyResponse>.BadRequest(ex.Message);
             }
+
+            // Check if user already belongs to a family
+            var currentFamilyId = await _familyRepository.GetUserFamilyIdAsync(userId);
+            if (currentFamilyId != null)
+            {
+                return ServiceResult<FamilyResponse>.BadRequest("User already belongs to a family.");
+            }
             
             // Generate a unique invite code for the family
             string inviteCode = await _inviteCodeGenerator.GenerateInviteCode();
@@ -94,8 +101,18 @@ namespace BackSharedGroceries.Services
                 return ServiceResult.BadRequest(ex.Message);
             }
 
+            // Check if user already belongs to a family
+            var currentFamilyId = await _familyRepository.GetUserFamilyIdAsync(userId);
+            if (currentFamilyId != null)
+            {
+                return ServiceResult.BadRequest("User already belongs to a family.");
+            }
+
+            // Normalize the invite code (remove hyphens and convert to uppercase)
+            string normalizedCode = request.InviteCode.Replace("-", "").ToUpper();
+
             // Obtain the family entity using the invite code
-            Family? family = await _familyRepository.GetByInviteCodeAsync(request.InviteCode);
+            Family? family = await _familyRepository.GetByInviteCodeAsync(normalizedCode);
 
             // If there is no family with the provided invite code, return not found
             if (family == null) {
@@ -132,11 +149,20 @@ namespace BackSharedGroceries.Services
 
             if (currentFamilyId == null)
             {
-                return ServiceResult.BadRequest("User is not currently part of any family.");
+                return ServiceResult.BadRequest("User is not part of any family.");
             }
 
             // Remove the user from their current family by setting FamilyId to null
             await _familyRepository.RemoveUserFromFamilyAsync(userId);
+
+            // Check if this was the last member of the family
+            var remainingMembers = await _familyRepository.GetFamilyMemberCountAsync(currentFamilyId.Value);
+            if (remainingMembers == 0)
+            {
+                // Delete the family if no members remain
+                await _familyRepository.DeleteFamilyAsync(currentFamilyId.Value);
+            }
+
             return ServiceResult.Ok();
         }
 
