@@ -57,10 +57,12 @@ namespace BackSharedGroceries.Repositories
         /// <param name="familyId">The ID of the family to associate with the user.</param>
         public async Task UpdateUserFamilyAsync(Guid userId, Guid familyId)
         {
-            await _context.Users
-                .Where(u => u.Id == userId)
-                .ExecuteUpdateAsync(u => u.SetProperty(user => user.FamilyId, familyId));
-            await _context.SaveChangesAsync();
+            var user = await _context.Users.FindAsync(userId);
+            if (user != null)
+            {
+                user.FamilyId = familyId;
+                await _context.SaveChangesAsync();
+            }
         }
 
         /// <summary>
@@ -84,12 +86,38 @@ namespace BackSharedGroceries.Repositories
         /// <param name="userId">The ID of the user to remove from family.</param>
         public async Task RemoveUserFromFamilyAsync(Guid userId)
         {
-            // Update the user's FamilyId to null, effectively removing them from their family
-            // Uses ExecuteUpdateAsync for efficient bulk update without loading the entity
-            await _context.Users
-                .Where(u => u.Id == userId)
-                .ExecuteUpdateAsync(u => u.SetProperty(user => user.FamilyId, (Guid?)null));
-            await _context.SaveChangesAsync();
+            var user = await _context.Users.FindAsync(userId);
+            if (user != null)
+            {
+                user.FamilyId = null;
+                await _context.SaveChangesAsync();
+            }
+        }
+
+        /// <summary>
+        /// Gets the count of members in a family.
+        /// </summary>
+        /// <param name="familyId">The ID of the family.</param>
+        /// <returns>The number of members in the family.</returns>
+        public async Task<int> GetFamilyMemberCountAsync(Guid familyId)
+        {
+            return await _context.Users
+                .Where(u => u.FamilyId == familyId)
+                .CountAsync();
+        }
+
+        /// <summary>
+        /// Deletes a family from the database.
+        /// </summary>
+        /// <param name="familyId">The ID of the family to delete.</param>
+        public async Task DeleteFamilyAsync(Guid familyId)
+        {
+            var family = await _context.Families.FindAsync(familyId);
+            if (family != null)
+            {
+                _context.Families.Remove(family);
+                await _context.SaveChangesAsync();
+            }
         }
     }
 }
