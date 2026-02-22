@@ -16,17 +16,20 @@ namespace BackSharedGroceries.Services
     {
         private readonly IProductRepository _productRepository;
         private readonly IFamilyRepository _familyRepository;
+        private readonly IShoppingListRepository _shoppingListRepository;
         private readonly IHttpContextAccessor _httpContextAccessor;
         private readonly ILogger<ProductService> _logger;
 
         public ProductService(
             IProductRepository productRepository,
             IFamilyRepository familyRepository,
+            IShoppingListRepository shoppingListRepository,
             IHttpContextAccessor httpContextAccessor,
             ILogger<ProductService> logger)
         {
             _productRepository = productRepository;
             _familyRepository = familyRepository;
+            _shoppingListRepository = shoppingListRepository;
             _httpContextAccessor = httpContextAccessor;
             _logger = logger;
         }
@@ -85,6 +88,9 @@ namespace BackSharedGroceries.Services
                 _logger.LogWarning("Product upsert failed for ID {ProductId}", dto.Id);
                 return ServiceResult<ProductResponse>.BadRequest("Failed to create product.");
             }
+
+            // Check if all products in the list are paid and auto-deactivate if necessary
+            await CheckAndAutoDeactivateListIfAllPaidAsync(product.ListId);
 
             // Map to response DTO
             var response = MapToResponse(product);
@@ -165,6 +171,9 @@ namespace BackSharedGroceries.Services
                 // This can happen when multiple users edit the same product while offline
                 return ServiceResult<ProductResponse>.Conflict("Product has been modified by another user. Please refresh and try again.");
             }
+
+            // Check if all products in the list are paid and auto-deactivate if necessary
+            await CheckAndAutoDeactivateListIfAllPaidAsync(product.ListId);
 
             // Map to response DTO
             var response = MapToResponse(product);
@@ -287,6 +296,8 @@ namespace BackSharedGroceries.Services
                 if (success)
                 {
                     syncResult.Synced.Add(dto.Id);
+                    // Check if all products in the list are paid and auto-deactivate if necessary
+                    await CheckAndAutoDeactivateListIfAllPaidAsync(product.ListId);
                 }
                 else
                 {
@@ -377,6 +388,28 @@ namespace BackSharedGroceries.Services
             }
 
             return userGuid;
+        }
+
+        /// <summary>
+        /// Checks if all products in a shopping list are paid and automatically deactivates the list if true.
+        /// </summary>
+        /// <param name="listId">The ID of the shopping list to check.</param>
+        private async Task CheckAndAutoDeactivateListIfAllPaidAsync(Guid listId)
+        {
+            try
+            {
+                var allPaid = await _shoppingListRepository.AreAllProductsPaidAsync(listId);
+                if (allPaid)
+                {
+                    await _shoppingListRepository.UpdateShoppingListStatusAsync(listId, false);
+                    _logger.LogInformation("Shopping list {ListId} was automatically deactivated because all products are paid.", listId);
+                }
+            }
+            catch (Exception ex)
+            {
+                // Log the error but don't fail the product update operation
+                _logger.LogError(ex, "Failed to auto-deactivate shopping list {ListId}", listId);
+            }
         }
     }
 }
