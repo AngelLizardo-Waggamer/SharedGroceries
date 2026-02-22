@@ -23,11 +23,13 @@ namespace BackSharedGroceries.Interfaces
             services.AddScoped<IRefreshTokenRepository, RefreshTokenRepository>();
             services.AddScoped<IFamilyRepository, FamilyRepository>();
             services.AddScoped<IProductRepository, ProductRepository>();
+            services.AddScoped<IShoppingListRepository, ShoppingListRepository>();
 
             // Register services
             services.AddScoped<IAuthService, AuthService>();
             services.AddScoped<IFamilyService, FamilyService>();
             services.AddScoped<IProductService, ProductService>();
+            services.AddScoped<IShoppingListService, ShoppingListService>();
 
             // Register Helpers
             services.AddScoped<IFamilyInviteCodeGenerator, FamilyInviteCodeGenerator>();
