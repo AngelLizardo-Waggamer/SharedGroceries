@@ -20,6 +20,7 @@ public class ProductServiceUnitTests
 {
     private readonly Mock<IProductRepository> _productRepositoryMock;
     private readonly Mock<IFamilyRepository> _familyRepositoryMock;
+    private readonly Mock<IShoppingListRepository> _shoppingListRepositoryMock;
     private readonly Mock<IHttpContextAccessor> _httpContextAccessorMock;
     private readonly Mock<ILogger<ProductService>> _loggerMock;
     private readonly ProductService _productService;
@@ -33,12 +34,14 @@ public class ProductServiceUnitTests
 
         _productRepositoryMock = new Mock<IProductRepository>();
         _familyRepositoryMock = new Mock<IFamilyRepository>();
+        _shoppingListRepositoryMock = new Mock<IShoppingListRepository>();
         _httpContextAccessorMock = new Mock<IHttpContextAccessor>();
         _loggerMock = new Mock<ILogger<ProductService>>();
 
         _productService = new ProductService(
             _productRepositoryMock.Object,
             _familyRepositoryMock.Object,
+            _shoppingListRepositoryMock.Object,
             _httpContextAccessorMock.Object,
             _loggerMock.Object
         );
@@ -462,6 +465,266 @@ public class ProductServiceUnitTests
         result.Success.Should().BeFalse();
         result.ResultType.Should().Be(ServiceResultType.Unauthorized);
         _productRepositoryMock.Verify(x => x.DeleteProductAsync(It.IsAny<Guid>()), Times.Never);
+    }
+
+    #endregion
+
+    #region Auto-Deactivation Tests
+
+    [Fact]
+    public async Task AddProductAsync_WhenAllProductsBecomePaid_AutoDeactivatesList()
+    {
+        // Arrange
+        var userId = Guid.NewGuid();
+        var familyId = Guid.NewGuid();
+        var listId = Guid.NewGuid();
+        
+        SetupHttpContext(userId, familyId);
+
+        _familyRepositoryMock
+            .Setup(x => x.GetUserFamilyIdAsync(userId))
+            .ReturnsAsync(familyId);
+
+        _productRepositoryMock
+            .Setup(x => x.GetFamilyListIdsAsync(familyId))
+            .ReturnsAsync(new List<Guid> { listId });
+
+        _productRepositoryMock
+            .Setup(x => x.UpsertProductAsync(It.IsAny<Product>()))
+            .ReturnsAsync(true);
+
+        // After adding this product, all products are paid
+        _shoppingListRepositoryMock
+            .Setup(x => x.AreAllProductsPaidAsync(listId))
+            .ReturnsAsync(true);
+
+        _shoppingListRepositoryMock
+            .Setup(x => x.UpdateShoppingListStatusAsync(listId, false))
+            .Returns(Task.CompletedTask);
+
+        var dto = new ProductUpsertDto
+        {
+            Id = Guid.NewGuid(),
+            Name = "Milk",
+            Quantity = "1L",
+            Status = ProductStatus.Paid,
+            ListId = listId,
+            ClientTimestamp = DateTime.UtcNow
+        };
+
+        // Act
+        var result = await _productService.AddProductAsync(dto);
+
+        // Assert
+        result.Success.Should().BeTrue();
+        
+        // Verify that the list was auto-deactivated
+        _shoppingListRepositoryMock.Verify(
+            x => x.AreAllProductsPaidAsync(listId), 
+            Times.Once
+        );
+        _shoppingListRepositoryMock.Verify(
+            x => x.UpdateShoppingListStatusAsync(listId, false), 
+            Times.Once
+        );
+    }
+
+    [Fact]
+    public async Task UpdateProductAsync_WhenAllProductsBecomePaid_AutoDeactivatesList()
+    {
+        // Arrange
+        var userId = Guid.NewGuid();
+        var familyId = Guid.NewGuid();
+        var listId = Guid.NewGuid();
+        var productId = Guid.NewGuid();
+        
+        SetupHttpContext(userId, familyId);
+
+        _familyRepositoryMock
+            .Setup(x => x.GetUserFamilyIdAsync(userId))
+            .ReturnsAsync(familyId);
+
+        _productRepositoryMock
+            .Setup(x => x.GetFamilyListIdsAsync(familyId))
+            .ReturnsAsync(new List<Guid> { listId });
+
+        var existingProduct = new Product
+        {
+            Id = productId,
+            ListId = listId,
+            Name = "Milk",
+            Quantity = "1L",
+            Status = ProductStatus.InCart,
+            LastModifiedByUserId = userId,
+            ClientTimestamp = DateTime.UtcNow.AddMinutes(-5)
+        };
+
+        _productRepositoryMock
+            .Setup(x => x.GetProductByIdAsync(productId))
+            .ReturnsAsync(existingProduct);
+
+        _productRepositoryMock
+            .Setup(x => x.UpsertProductAsync(It.IsAny<Product>()))
+            .ReturnsAsync(true);
+
+        // After updating this product to Paid, all products are now paid
+        _shoppingListRepositoryMock
+            .Setup(x => x.AreAllProductsPaidAsync(listId))
+            .ReturnsAsync(true);
+
+        _shoppingListRepositoryMock
+            .Setup(x => x.UpdateShoppingListStatusAsync(listId, false))
+            .Returns(Task.CompletedTask);
+
+        var dto = new ProductUpsertDto
+        {
+            Id = productId,
+            Name = "Milk",
+            Quantity = "1L",
+            Status = ProductStatus.Paid, // Changed to Paid
+            ListId = listId,
+            ClientTimestamp = DateTime.UtcNow
+        };
+
+        // Act
+        var result = await _productService.UpdateProductAsync(productId, dto);
+
+        // Assert
+        result.Success.Should().BeTrue();
+        
+        // Verify that the list was auto-deactivated
+        _shoppingListRepositoryMock.Verify(
+            x => x.AreAllProductsPaidAsync(listId), 
+            Times.Once
+        );
+        _shoppingListRepositoryMock.Verify(
+            x => x.UpdateShoppingListStatusAsync(listId, false), 
+            Times.Once
+        );
+    }
+
+    [Fact]
+    public async Task AddProductAsync_WhenNotAllProductsPaid_DoesNotDeactivateList()
+    {
+        // Arrange
+        var userId = Guid.NewGuid();
+        var familyId = Guid.NewGuid();
+        var listId = Guid.NewGuid();
+        
+        SetupHttpContext(userId, familyId);
+
+        _familyRepositoryMock
+            .Setup(x => x.GetUserFamilyIdAsync(userId))
+            .ReturnsAsync(familyId);
+
+        _productRepositoryMock
+            .Setup(x => x.GetFamilyListIdsAsync(familyId))
+            .ReturnsAsync(new List<Guid> { listId });
+
+        _productRepositoryMock
+            .Setup(x => x.UpsertProductAsync(It.IsAny<Product>()))
+            .ReturnsAsync(true);
+
+        // Not all products are paid
+        _shoppingListRepositoryMock
+            .Setup(x => x.AreAllProductsPaidAsync(listId))
+            .ReturnsAsync(false);
+
+        var dto = new ProductUpsertDto
+        {
+            Id = Guid.NewGuid(),
+            Name = "Milk",
+            Quantity = "1L",
+            Status = ProductStatus.Pending,
+            ListId = listId,
+            ClientTimestamp = DateTime.UtcNow
+        };
+
+        // Act
+        var result = await _productService.AddProductAsync(dto);
+
+        // Assert
+        result.Success.Should().BeTrue();
+        
+        // Verify that the list was NOT deactivated
+        _shoppingListRepositoryMock.Verify(
+            x => x.UpdateShoppingListStatusAsync(It.IsAny<Guid>(), It.IsAny<bool>()), 
+            Times.Never
+        );
+    }
+
+    [Fact]
+    public async Task SyncBatchAsync_WhenAllProductsBecomePaid_AutoDeactivatesList()
+    {
+        // Arrange
+        var userId = Guid.NewGuid();
+        var familyId = Guid.NewGuid();
+        var listId = Guid.NewGuid();
+        
+        SetupHttpContext(userId, familyId);
+
+        _familyRepositoryMock
+            .Setup(x => x.GetUserFamilyIdAsync(userId))
+            .ReturnsAsync(familyId);
+
+        _productRepositoryMock
+            .Setup(x => x.GetFamilyListIdsAsync(familyId))
+            .ReturnsAsync(new List<Guid> { listId });
+
+        _productRepositoryMock
+            .Setup(x => x.UpsertProductAsync(It.IsAny<Product>()))
+            .ReturnsAsync(true);
+
+        // After syncing, all products are paid
+        _shoppingListRepositoryMock
+            .Setup(x => x.AreAllProductsPaidAsync(listId))
+            .ReturnsAsync(true);
+
+        _shoppingListRepositoryMock
+            .Setup(x => x.UpdateShoppingListStatusAsync(listId, false))
+            .Returns(Task.CompletedTask);
+
+        var batch = new SyncBatchDto
+        {
+            Products = new List<ProductUpsertDto>
+            {
+                new ProductUpsertDto
+                {
+                    Id = Guid.NewGuid(),
+                    Name = "Milk",
+                    Quantity = "1L",
+                    Status = ProductStatus.Paid,
+                    ListId = listId,
+                    ClientTimestamp = DateTime.UtcNow
+                },
+                new ProductUpsertDto
+                {
+                    Id = Guid.NewGuid(),
+                    Name = "Bread",
+                    Quantity = "1",
+                    Status = ProductStatus.Paid,
+                    ListId = listId,
+                    ClientTimestamp = DateTime.UtcNow
+                }
+            }
+        };
+
+        // Act
+        var result = await _productService.SyncBatchAsync(batch);
+
+        // Assert
+        result.Success.Should().BeTrue();
+        result.Data!.Synced.Should().HaveCount(2);
+        
+        // Verify that the list was checked and auto-deactivated for each product
+        _shoppingListRepositoryMock.Verify(
+            x => x.AreAllProductsPaidAsync(listId), 
+            Times.Exactly(2) // Once per product
+        );
+        _shoppingListRepositoryMock.Verify(
+            x => x.UpdateShoppingListStatusAsync(listId, false), 
+            Times.Exactly(2) // Called each time all products are paid
+        );
     }
 
     #endregion
