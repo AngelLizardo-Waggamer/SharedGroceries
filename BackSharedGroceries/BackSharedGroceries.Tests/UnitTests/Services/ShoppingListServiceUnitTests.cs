@@ -1,11 +1,13 @@
 using System.Security.Claims;
 using BackSharedGroceries.Common;
 using BackSharedGroceries.DTOs;
+using BackSharedGroceries.Hubs;
 using BackSharedGroceries.Interfaces.Repositories;
 using BackSharedGroceries.Models;
 using BackSharedGroceries.Services;
 using FluentAssertions;
 using Microsoft.AspNetCore.Http;
+using Microsoft.AspNetCore.SignalR;
 using Moq;
 
 namespace BackSharedGroceries.Tests.UnitTests.Services;
@@ -19,6 +21,7 @@ public class ShoppingListServiceUnitTests
     private readonly Mock<IShoppingListRepository> _shoppingListRepositoryMock;
     private readonly Mock<IFamilyRepository> _familyRepositoryMock;
     private readonly Mock<IHttpContextAccessor> _httpContextAccessorMock;
+    private readonly Mock<IHubContext<ShoppingListHub>> _hubContextMock;
     private readonly ShoppingListService _shoppingListService;
 
     public ShoppingListServiceUnitTests()
@@ -32,10 +35,21 @@ public class ShoppingListServiceUnitTests
         _familyRepositoryMock = new Mock<IFamilyRepository>();
         _httpContextAccessorMock = new Mock<IHttpContextAccessor>();
 
+        // Hub context mock — hub calls aren't verified in unit tests, just need it to not throw.
+        _hubContextMock = new Mock<IHubContext<ShoppingListHub>>();
+        var clientsMock = new Mock<IHubClients>();
+        var clientProxyMock = new Mock<IClientProxy>();
+        clientProxyMock
+            .Setup(x => x.SendCoreAsync(It.IsAny<string>(), It.IsAny<object[]>(), It.IsAny<CancellationToken>()))
+            .Returns(Task.CompletedTask);
+        clientsMock.Setup(x => x.Group(It.IsAny<string>())).Returns(clientProxyMock.Object);
+        _hubContextMock.Setup(x => x.Clients).Returns(clientsMock.Object);
+
         _shoppingListService = new ShoppingListService(
             _shoppingListRepositoryMock.Object,
             _familyRepositoryMock.Object,
-            _httpContextAccessorMock.Object
+            _httpContextAccessorMock.Object,
+            _hubContextMock.Object
         );
     }
 

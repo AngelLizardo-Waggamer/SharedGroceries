@@ -2,11 +2,13 @@ using System.Security.Claims;
 using BackSharedGroceries.Common;
 using BackSharedGroceries.DTOs;
 using BackSharedGroceries.Enums;
+using BackSharedGroceries.Hubs;
 using BackSharedGroceries.Interfaces.Repositories;
 using BackSharedGroceries.Models;
 using BackSharedGroceries.Services;
 using FluentAssertions;
 using Microsoft.AspNetCore.Http;
+using Microsoft.AspNetCore.SignalR;
 using Microsoft.Extensions.Logging;
 using Moq;
 
@@ -23,6 +25,7 @@ public class ProductServiceUnitTests
     private readonly Mock<IShoppingListRepository> _shoppingListRepositoryMock;
     private readonly Mock<IHttpContextAccessor> _httpContextAccessorMock;
     private readonly Mock<ILogger<ProductService>> _loggerMock;
+    private readonly Mock<IHubContext<ShoppingListHub>> _hubContextMock;
     private readonly ProductService _productService;
 
     public ProductServiceUnitTests()
@@ -38,12 +41,23 @@ public class ProductServiceUnitTests
         _httpContextAccessorMock = new Mock<IHttpContextAccessor>();
         _loggerMock = new Mock<ILogger<ProductService>>();
 
+        // Hub context mock — hub calls aren't verified in unit tests, just need it to not throw.
+        _hubContextMock = new Mock<IHubContext<ShoppingListHub>>();
+        var clientsMock = new Mock<IHubClients>();
+        var clientProxyMock = new Mock<IClientProxy>();
+        clientProxyMock
+            .Setup(x => x.SendCoreAsync(It.IsAny<string>(), It.IsAny<object[]>(), It.IsAny<CancellationToken>()))
+            .Returns(Task.CompletedTask);
+        clientsMock.Setup(x => x.Group(It.IsAny<string>())).Returns(clientProxyMock.Object);
+        _hubContextMock.Setup(x => x.Clients).Returns(clientsMock.Object);
+
         _productService = new ProductService(
             _productRepositoryMock.Object,
             _familyRepositoryMock.Object,
             _shoppingListRepositoryMock.Object,
             _httpContextAccessorMock.Object,
-            _loggerMock.Object
+            _loggerMock.Object,
+            _hubContextMock.Object
         );
     }
 
