@@ -1,3 +1,4 @@
+using BackSharedGroceries.Hubs;
 using BackSharedGroceries.Middlewares;
 using Data;
 using BackSharedGroceries.Interfaces;
@@ -13,8 +14,11 @@ builder.Services.ConfigureSwaggerDocGen();
 // DbContext configuration
 builder.Services.ConfigureDbContext(builder.Configuration);
 
-// JWT Authentication configuration
+// JWT Authentication — also handles token extraction for hub connections
 builder.Services.ConfigureJWTAuth();
+
+// SignalR
+builder.Services.AddSignalR();
 
 // Services and Repositories configuration
 builder.Services.ConfigureInterfaces();
@@ -47,6 +51,7 @@ app.UseAuthorization();
 app.UseMiddleware<DeviceSessionMiddleware>();
 
 app.MapControllers();
+app.MapHub<ShoppingListHub>("/hubs/shopping");
 
 app.Run();
 

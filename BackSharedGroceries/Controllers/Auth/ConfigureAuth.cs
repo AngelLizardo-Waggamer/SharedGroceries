@@ -33,6 +33,30 @@ namespace BackSharedGroceries.Controllers.Auth
                     ValidAudience = JwtConstants.Audience,
                     IssuerSigningKey = new SymmetricSecurityKey(Encoding.UTF8.GetBytes(JwtConstants.SecretKey))
                 };
+
+                // SignalR needs the token pulled from the Authorization header manually.
+                // The Flutter client sends it as a standard Bearer header on both
+                // the negotiate request and subsequent transports.
+                options.Events = new JwtBearerEvents
+                {
+                    OnMessageReceived = context =>
+                    {
+                        var path = context.HttpContext.Request.Path;
+                        if (!path.StartsWithSegments("/hubs"))
+                        {
+                            return Task.CompletedTask;
+                        }
+
+                        var authHeader = context.Request.Headers.Authorization.ToString();
+                        if (!string.IsNullOrEmpty(authHeader) &&
+                            authHeader.StartsWith("Bearer ", StringComparison.OrdinalIgnoreCase))
+                        {
+                            context.Token = authHeader["Bearer ".Length..].Trim();
+                        }
+
+                        return Task.CompletedTask;
+                    }
+                };
             });
         }
     }
