@@ -2,9 +2,12 @@ using System.Security.Claims;
 using BackSharedGroceries.Common;
 using BackSharedGroceries.DTOs;
 using BackSharedGroceries.DTOs.Responses;
+using BackSharedGroceries.Enums;
+using BackSharedGroceries.Hubs;
 using BackSharedGroceries.Interfaces.Repositories;
 using BackSharedGroceries.Interfaces.Services;
 using BackSharedGroceries.Models;
+using Microsoft.AspNetCore.SignalR;
 
 namespace BackSharedGroceries.Services
 {
@@ -19,19 +22,22 @@ namespace BackSharedGroceries.Services
         private readonly IShoppingListRepository _shoppingListRepository;
         private readonly IHttpContextAccessor _httpContextAccessor;
         private readonly ILogger<ProductService> _logger;
+        private readonly IHubContext<ShoppingListHub> _hubContext;
 
         public ProductService(
             IProductRepository productRepository,
             IFamilyRepository familyRepository,
             IShoppingListRepository shoppingListRepository,
             IHttpContextAccessor httpContextAccessor,
-            ILogger<ProductService> logger)
+            ILogger<ProductService> logger,
+            IHubContext<ShoppingListHub> hubContext)
         {
             _productRepository = productRepository;
             _familyRepository = familyRepository;
             _shoppingListRepository = shoppingListRepository;
             _httpContextAccessor = httpContextAccessor;
             _logger = logger;
+            _hubContext = hubContext;
         }
 
         /// <summary>
@@ -90,10 +96,15 @@ namespace BackSharedGroceries.Services
             }
 
             // Check if all products in the list are paid and auto-deactivate if necessary
-            await CheckAndAutoDeactivateListIfAllPaidAsync(product.ListId);
+            await CheckAndAutoDeactivateListIfAllPaidAsync(product.ListId, familyId.Value);
 
             // Map to response DTO
             var response = MapToResponse(product);
+
+            // Notify family members in real-time
+            await _hubContext.Clients.Group(familyId.Value.ToString())
+                .SendAsync(HubMethod.ProductAdded.ToString(), response);
+
             return ServiceResult<ProductResponse>.Ok(response);
         }
 
@@ -173,10 +184,15 @@ namespace BackSharedGroceries.Services
             }
 
             // Check if all products in the list are paid and auto-deactivate if necessary
-            await CheckAndAutoDeactivateListIfAllPaidAsync(product.ListId);
+            await CheckAndAutoDeactivateListIfAllPaidAsync(product.ListId, familyId.Value);
 
             // Map to response DTO
             var response = MapToResponse(product);
+
+            // Notify family members in real-time
+            await _hubContext.Clients.Group(familyId.Value.ToString())
+                .SendAsync(HubMethod.ProductUpdated.ToString(), response);
+
             return ServiceResult<ProductResponse>.Ok(response);
         }
 
@@ -228,6 +244,10 @@ namespace BackSharedGroceries.Services
                 _logger.LogWarning("Failed to delete product {ProductId}", id);
                 return ServiceResult.BadRequest("Failed to delete product.");
             }
+
+            // Notify family members in real-time
+            await _hubContext.Clients.Group(familyId.Value.ToString())
+                .SendAsync(HubMethod.ProductDeleted.ToString(), id);
 
             return ServiceResult.Ok();
         }
@@ -297,7 +317,10 @@ namespace BackSharedGroceries.Services
                 {
                     syncResult.Synced.Add(dto.Id);
                     // Check if all products in the list are paid and auto-deactivate if necessary
-                    await CheckAndAutoDeactivateListIfAllPaidAsync(product.ListId);
+                    await CheckAndAutoDeactivateListIfAllPaidAsync(product.ListId, familyId.Value);
+                    // Notify family members in real-time
+                    await _hubContext.Clients.Group(familyId.Value.ToString())
+                        .SendAsync(HubMethod.ProductUpdated.ToString(), MapToResponse(product));
                 }
                 else
                 {
@@ -391,10 +414,12 @@ namespace BackSharedGroceries.Services
         }
 
         /// <summary>
-        /// Checks if all products in a shopping list are paid and automatically deactivates the list if true.
+        /// Checks if all products in a shopping list are paid and deactivates it if so.
+        /// Also fires a ListArchived hub event to the family group.
         /// </summary>
-        /// <param name="listId">The ID of the shopping list to check.</param>
-        private async Task CheckAndAutoDeactivateListIfAllPaidAsync(Guid listId)
+        /// <param name="listId">The shopping list to check.</param>
+        /// <param name="familyId">Used to send the hub event to the right family group.</param>
+        private async Task CheckAndAutoDeactivateListIfAllPaidAsync(Guid listId, Guid familyId)
         {
             try
             {
@@ -403,6 +428,10 @@ namespace BackSharedGroceries.Services
                 {
                     await _shoppingListRepository.UpdateShoppingListStatusAsync(listId, false);
                     _logger.LogInformation("Shopping list {ListId} was automatically deactivated because all products are paid.", listId);
+
+                    // Notify family members that the list was archived
+                    await _hubContext.Clients.Group(familyId.ToString())
+                        .SendAsync(HubMethod.ListArchived.ToString(), listId);
                 }
             }
             catch (Exception ex)

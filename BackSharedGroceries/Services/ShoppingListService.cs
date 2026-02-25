@@ -2,9 +2,12 @@ using System.Security.Claims;
 using BackSharedGroceries.Common;
 using BackSharedGroceries.DTOs;
 using BackSharedGroceries.DTOs.Responses;
+using BackSharedGroceries.Enums;
+using BackSharedGroceries.Hubs;
 using BackSharedGroceries.Interfaces.Repositories;
 using BackSharedGroceries.Interfaces.Services;
 using BackSharedGroceries.Models;
+using Microsoft.AspNetCore.SignalR;
 
 namespace BackSharedGroceries.Services
 {
@@ -16,15 +19,18 @@ namespace BackSharedGroceries.Services
         private readonly IShoppingListRepository _shoppingListRepository;
         private readonly IFamilyRepository _familyRepository;
         private readonly IHttpContextAccessor _httpContextAccessor;
+        private readonly IHubContext<ShoppingListHub> _hubContext;
 
         public ShoppingListService(
             IShoppingListRepository shoppingListRepository,
             IFamilyRepository familyRepository,
-            IHttpContextAccessor httpContextAccessor)
+            IHttpContextAccessor httpContextAccessor,
+            IHubContext<ShoppingListHub> hubContext)
         {
             _shoppingListRepository = shoppingListRepository;
             _familyRepository = familyRepository;
             _httpContextAccessor = httpContextAccessor;
+            _hubContext = hubContext;
         }
 
         /// <summary>
@@ -67,14 +73,20 @@ namespace BackSharedGroceries.Services
             await _shoppingListRepository.CreateShoppingListAsync(newShoppingList);
 
             // Return the created shopping list information
-            return ServiceResult<ShoppingListResponse>.Ok(new ShoppingListResponse
+            var response = new ShoppingListResponse
             {
                 Id = newShoppingList.Id,
                 Name = newShoppingList.Name,
                 IsActive = newShoppingList.IsActive,
                 CreatedAt = newShoppingList.CreatedAt,
                 FamilyId = newShoppingList.FamilyId
-            });
+            };
+
+            // Notify family members in real-time
+            await _hubContext.Clients.Group(familyId.Value.ToString())
+                .SendAsync(HubMethod.ListCreated.ToString(), response);
+
+            return ServiceResult<ShoppingListResponse>.Ok(response);
         }
 
         /// <summary>
@@ -165,6 +177,10 @@ namespace BackSharedGroceries.Services
             // Soft delete the shopping list
             await _shoppingListRepository.SoftDeleteShoppingListAsync(listId);
 
+            // Notify family members in real-time
+            await _hubContext.Clients.Group(familyId.Value.ToString())
+                .SendAsync(HubMethod.ListArchived.ToString(), listId);
+
             return ServiceResult.Ok();
         }
 
@@ -253,6 +269,13 @@ namespace BackSharedGroceries.Services
 
             // Update the status
             await _shoppingListRepository.UpdateShoppingListStatusAsync(listId, isActive);
+
+            // Notify family members in real-time when a list is archived
+            if (!isActive)
+            {
+                await _hubContext.Clients.Group(familyId.Value.ToString())
+                    .SendAsync(HubMethod.ListArchived.ToString(), listId);
+            }
 
             return ServiceResult.Ok();
         }
