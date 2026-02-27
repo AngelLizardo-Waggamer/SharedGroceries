@@ -1,6 +1,8 @@
 import 'dart:io';
 
 import 'package:app_frontend/API/DTOs/dto.dart';
+import 'package:app_frontend/Auth/auth_interceptor.dart';
+import 'package:app_frontend/Auth/session_manager.dart';
 import 'package:dio/dio.dart';
 import 'package:dio/io.dart';
 
@@ -12,41 +14,56 @@ class ApiClient {
 	late Dio _dio;
 	late String _apiVersion;
 
-	// Constructor to initialize the API client with a base URL and configure Dio
-	ApiClient({required String baseUrl, required String apiVersion}) {
+	// Constructor to initialize the API client with a base URL and configure Dio.
+	// Provide [sessionManager] to enable automatic Bearer-token injection and
+	// transparent token refresh for authorised routes.
+	ApiClient({
+		required String baseUrl,
+		required String apiVersion,
+		SessionManager? sessionManager,
+	}) {
 		_apiVersion = apiVersion;
 
 		// Dio base instance
 		_dio = Dio(BaseOptions(
 			baseUrl: baseUrl,
-			connectTimeout: Duration(seconds: 5),
-			receiveTimeout: Duration(seconds: 2),
-			responseType: ResponseType.json
+			connectTimeout: const Duration(seconds: 5),
+			receiveTimeout: const Duration(seconds: 2),
+			responseType: ResponseType.json,
 		));
-	
+
 		// HttpClient that accepts all or none certificates (this mainly because local API is using http, not https)
 		_dio.httpClientAdapter = IOHttpClientAdapter(
 			createHttpClient: () {
 				final client = HttpClient();
-				client.badCertificateCallback = (X509Certificate cert, String host, int port) => true;
+				client.badCertificateCallback =
+						(X509Certificate cert, String host, int port) => true;
 				return client;
-			}
+			},
 		);
+
+		// When a SessionManager is provided, add the auth interceptor that
+		// injects Bearer tokens and handles transparent token refresh on 401.
+		if (sessionManager != null) {
+			_dio.interceptors.add(buildAuthInterceptor(_dio, _apiVersion, sessionManager));
+		}
 
 		// Log interceptor for debugging. Can be removed in prod.
 		_dio.interceptors.add(LogInterceptor(requestBody: true, responseBody: true));
 	}
 
-	/// Handles requests sent to AuthController
+	/// Handles requests sent to AuthController.
+	/// All auth routes skip token injection since they are unauthenticated endpoints.
 	Future<Response> authRequest(AuthRoutes route, DTO data) {
+		Options noAuth = Options(extra: {'skipAuth': true});
 		try {
 			switch (route) {
 				case .register:
-					return _dio.post('auth/$_apiVersion/register', data: data.toJson());
+					return _dio.post('auth/$_apiVersion/register', data: data.toJson(), options: noAuth);
 				case .login:
-					return _dio.post('auth/$_apiVersion/login', data: data.toJson());
+					return _dio.post('auth/$_apiVersion/login', data: data.toJson(), options: noAuth);
 				case .refresh:
-					return _dio.post('auth/$_apiVersion/refresh', data: data.toJson());
+					return _dio.post('auth/$_apiVersion/refresh', data: data.toJson(), options: noAuth);
 			}
 		} on DioException catch (e) {
 			throw _handleError(e);
