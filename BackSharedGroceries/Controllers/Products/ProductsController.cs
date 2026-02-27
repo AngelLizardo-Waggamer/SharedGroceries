@@ -79,18 +79,17 @@ namespace BackSharedGroceries.Controllers.Products
         }
 
         /// <summary>
-        /// Updates an existing product.
+        /// Updates an existing product. The product ID is taken from the DTO payload.
         /// </summary>
-        /// <param name="id">Product ID to update</param>
-        /// <param name="dto">Updated product data</param>
+        /// <param name="dto">Updated product data (must include the Id of the product to update)</param>
         /// <returns>Updated product information</returns>
         /// <response code="200">The product was updated successfully.</response>
         /// <response code="400">The data sent is not valid.</response>
         /// <response code="401">The user is not authenticated or doesn't have permission.</response>
         /// <response code="404">Product not found.</response>
         /// <response code="409">Product has been modified by another user (stale timestamp).</response>
-        [HttpPatch("v1/update/{id}")]
-        public async Task<IActionResult> UpdateProduct(Guid id, [FromBody] ProductUpsertDto dto)
+        [HttpPatch("v1/update")]
+        public async Task<IActionResult> UpdateProduct([FromBody] ProductUpsertDto dto)
         {
             if (!ModelState.IsValid)
             {
@@ -101,7 +100,7 @@ namespace BackSharedGroceries.Controllers.Products
                 return BadRequest("Invalid product data.");
             }
 
-            var result = await _productService.UpdateProductAsync(id, dto);
+            var result = await _productService.UpdateProductAsync(dto);
 
             return result.ResultType switch
             {

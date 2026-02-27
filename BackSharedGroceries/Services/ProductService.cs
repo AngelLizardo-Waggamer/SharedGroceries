@@ -112,17 +112,10 @@ namespace BackSharedGroceries.Services
         /// Updates an existing product with conflict resolution.
         /// Implements Last-Write-Wins strategy using client timestamps to handle offline sync scenarios.
         /// </summary>
-        /// <param name="id">The product ID to update.</param>
-        /// <param name="dto">Updated product data.</param>
+        /// <param name="dto">Updated product data (Id is read from the DTO).</param>
         /// <returns>Service result containing the updated product response.</returns>
-        public async Task<ServiceResult<ProductResponse>> UpdateProductAsync(Guid id, ProductUpsertDto dto)
+        public async Task<ServiceResult<ProductResponse>> UpdateProductAsync(ProductUpsertDto dto)
         {
-            // Ensure the ID in the URL matches the ID in the DTO
-            if (id != dto.Id)
-            {
-                return ServiceResult<ProductResponse>.BadRequest("Product ID mismatch.");
-            }
-
             // Get authenticated user ID
             Guid userId;
             try
@@ -149,7 +142,7 @@ namespace BackSharedGroceries.Services
             }
 
             // Check if product exists
-            var existingProduct = await _productRepository.GetProductByIdAsync(id);
+            var existingProduct = await _productRepository.GetProductByIdAsync(dto.Id);
             if (existingProduct == null)
             {
                 return ServiceResult<ProductResponse>.NotFound("Product not found.");

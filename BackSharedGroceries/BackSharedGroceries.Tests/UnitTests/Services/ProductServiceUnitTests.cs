@@ -601,7 +601,7 @@ public class ProductServiceUnitTests
         };
 
         // Act
-        var result = await _productService.UpdateProductAsync(productId, dto);
+        var result = await _productService.UpdateProductAsync(dto);
 
         // Assert
         result.Success.Should().BeTrue();

@@ -62,7 +62,7 @@ public class ShoppingListAutoDeactivationIntegrationTests : IntegrationTestBase
         };
 
         // Act
-        var response = await _client.PatchAsJsonAsync($"/api/products/v1/update/{eggsProduct.Id}", updateDto);
+        var response = await _client.PatchAsJsonAsync("/api/products/v1/update", updateDto);
 
         // Assert
         response.StatusCode.Should().Be(HttpStatusCode.OK);
@@ -106,7 +106,7 @@ public class ShoppingListAutoDeactivationIntegrationTests : IntegrationTestBase
         };
 
         // Act
-        var response = await _client.PatchAsJsonAsync($"/api/products/v1/update/{breadProduct.Id}", updateDto);
+        var response = await _client.PatchAsJsonAsync("/api/products/v1/update", updateDto);
 
         // Assert
         response.StatusCode.Should().Be(HttpStatusCode.OK);
@@ -145,7 +145,7 @@ public class ShoppingListAutoDeactivationIntegrationTests : IntegrationTestBase
         };
 
         // Act
-        var response = await _client.PatchAsJsonAsync($"/api/products/v1/update/{milkProduct.Id}", updateDto);
+        var response = await _client.PatchAsJsonAsync("/api/products/v1/update", updateDto);
 
         // Assert
         response.StatusCode.Should().Be(HttpStatusCode.OK);
@@ -275,7 +275,7 @@ public class ShoppingListAutoDeactivationIntegrationTests : IntegrationTestBase
             ClientTimestamp = DateTime.UtcNow
         };
 
-        var updateResponse = await _client.PatchAsJsonAsync($"/api/products/v1/update/{product.Id}", updateDto);
+        var updateResponse = await _client.PatchAsJsonAsync("/api/products/v1/update", updateDto);
         updateResponse.StatusCode.Should().Be(HttpStatusCode.OK);
 
         // Verify list is deactivated
@@ -325,7 +325,7 @@ public class ShoppingListAutoDeactivationIntegrationTests : IntegrationTestBase
         };
 
         // Act
-        var response = await _client.PatchAsJsonAsync($"/api/products/v1/update/{list1Product.Id}", updateDto);
+        var response = await _client.PatchAsJsonAsync("/api/products/v1/update", updateDto);
 
         // Assert
         response.StatusCode.Should().Be(HttpStatusCode.OK);

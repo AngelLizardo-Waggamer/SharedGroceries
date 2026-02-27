@@ -19,10 +19,9 @@ namespace BackSharedGroceries.Interfaces.Services
         /// <summary>
         /// Updates an existing product.
         /// </summary>
-        /// <param name="id">The product ID to update.</param>
-        /// <param name="dto">Updated product data.</param>
+        /// <param name="dto">Updated product data (Id is read from the DTO).</param>
         /// <returns>Service result containing the updated product response.</returns>
-        Task<ServiceResult<ProductResponse>> UpdateProductAsync(Guid id, ProductUpsertDto dto);
+        Task<ServiceResult<ProductResponse>> UpdateProductAsync(ProductUpsertDto dto);
 
         /// <summary>
         /// Deletes a product.

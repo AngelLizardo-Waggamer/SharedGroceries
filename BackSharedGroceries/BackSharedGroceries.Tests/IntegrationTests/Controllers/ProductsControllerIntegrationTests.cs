@@ -113,7 +113,7 @@ public class ProductsControllerIntegrationTests : IntegrationTestBase
         };
 
         // Act
-        var response = await _client.PatchAsJsonAsync($"/api/products/v1/update/{productA.Id}", updateDto);
+        var response = await _client.PatchAsJsonAsync("/api/products/v1/update", updateDto);
 
         // Assert
         // Should fail with either 401 Unauthorized or 404 NotFound (to not leak info about other families)
@@ -229,7 +229,7 @@ public class ProductsControllerIntegrationTests : IntegrationTestBase
         };
 
         // Act
-        var response = await _client.PatchAsJsonAsync($"/api/products/v1/update/{product.Id}", updateDto);
+        var response = await _client.PatchAsJsonAsync("/api/products/v1/update", updateDto);
 
         // Assert
         // Should return 200 OK or 409 Conflict depending on your implementation
@@ -275,7 +275,7 @@ public class ProductsControllerIntegrationTests : IntegrationTestBase
         };
 
         // Act
-        var response = await _client.PatchAsJsonAsync($"/api/products/v1/update/{product.Id}", updateDto);
+        var response = await _client.PatchAsJsonAsync("/api/products/v1/update", updateDto);
 
         // Assert
         response.StatusCode.Should().Be(HttpStatusCode.OK);
