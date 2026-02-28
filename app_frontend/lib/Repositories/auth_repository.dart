@@ -46,7 +46,7 @@ class AuthRepository {
     } on DioException catch (e) {
       // 401 has its own message since it means wrong credentials, not a server fault.
       if (e.response?.statusCode == 401) {
-        throw const RepositoryException('Invalid username or password.');
+        throw const RepositoryException('Las credenciales son incorrectas. Inténtalo de nuevo.');
       }
       throw RepositoryException(dioErrorMessage(e));
     } catch (e) {

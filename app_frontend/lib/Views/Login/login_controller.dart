@@ -62,7 +62,7 @@ class LoginController extends ChangeNotifier {
   bool _validate() {
     if (usernameController.text.trim().isEmpty ||
         passwordController.text.isEmpty) {
-      _errorMessage = 'Username and password are required.';
+      _errorMessage = 'Rellena todos los campos.';
       notifyListeners();
       return false;
     }
