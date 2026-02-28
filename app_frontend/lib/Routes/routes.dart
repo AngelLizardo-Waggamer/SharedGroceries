@@ -4,10 +4,15 @@ import 'package:flutter/material.dart';
 class Routes {
 	Routes._();
 
+  static String get home => '/home';
+  static String get login => '/login';
+  static String get register => '/register';
+  static String get onboarding => '/onboarding';
+
 	static Map<String, WidgetBuilder> get routes => {
-		'/home': (context) => const HomeView(),
-		'/login': (context) => const LoginView(),
-		'/register': (context) => const RegisterView(),
-		'/onboarding': (context) => OnboardingView(),
+		home: (context) => const HomeView(),
+		login: (context) => const LoginView(),
+		register: (context) => const RegisterView(),
+		onboarding: (context) => OnboardingView(),
 	};
 }
