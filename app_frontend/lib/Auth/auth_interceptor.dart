@@ -1,3 +1,4 @@
+import 'package:app_frontend/API/DTOs/auth_dtos.dart';
 import 'package:app_frontend/Auth/session_manager.dart';
 import 'package:dio/dio.dart';
 
@@ -53,16 +54,16 @@ QueuedInterceptorsWrapper buildAuthInterceptor(
 				// does not try to inject / refresh a token for this request.
 				final refreshResponse = await dio.post(
 					'auth/$apiVersion/refresh',
-					data: {'refreshToken': refreshToken},
+					data: RefreshDTO(refreshToken: refreshToken).toJson(),
 					options: Options(extra: {'skipAuth': true}),
 				);
 
-				final body            = refreshResponse.data as Map<String, dynamic>;
-				final newAuthToken    = body['authToken']    as String;
+				final body = refreshResponse.data as Map<String, dynamic>;
+				final newAuthToken = body['authToken'] as String;
 				final newRefreshToken = body['refreshToken'] as String;
 
 				await session.saveTokens(
-					authToken:    newAuthToken,
+					authToken: newAuthToken,
 					refreshToken: newRefreshToken,
 				);
 

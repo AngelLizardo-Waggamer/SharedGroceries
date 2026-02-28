@@ -15,8 +15,10 @@ class SessionExpiredException implements Exception {
 /// token and [ApiClient]'s 401 interceptor triggers a refresh when needed.
 /// Network concerns live in [ApiClient], which owns the [Dio] instance.
 class SessionManager {
-	static const _authTokenKey    = 'auth_token';
+	static const _authTokenKey = 'auth_token';
 	static const _refreshTokenKey = 'refresh_token';
+	static const _usernameKey = 'username';
+	static const _familyIdKey = 'family_id';
 
 	final FlutterSecureStorage _storage = const FlutterSecureStorage();
 
@@ -24,7 +26,7 @@ class SessionManager {
 
 	// ─── Storage ─────────────────────────────────────────────────────────────
 
-	/// Persists both tokens after a successful login / token refresh.
+	/// Persists both tokens. Called by the auth interceptor on token refresh.
 	Future<void> saveTokens({
 		required String authToken,
 		required String refreshToken,
@@ -35,16 +37,30 @@ class SessionManager {
 		]);
 	}
 
-	/// Returns the stored access token, or `null` if not present.
+	/// Persists user info returned by the login endpoint.
+	/// [familyId] may be null when the user hasn't joined a family yet.
+	Future<void> saveUserData({
+		required String username,
+		required String? familyId,
+	}) async {
+		await Future.wait([
+			_storage.write(key: _usernameKey, value: username),
+			_storage.write(key: _familyIdKey, value: familyId),
+		]);
+	}
+
 	Future<String?> getAuthToken() => _storage.read(key: _authTokenKey);
-
-	/// Returns the stored refresh token, or `null` if not present.
 	Future<String?> getRefreshToken() => _storage.read(key: _refreshTokenKey);
+	Future<String?> getUsername() => _storage.read(key: _usernameKey);
+	/// Returns null when the user has no family yet.
+	Future<String?> getFamilyId() => _storage.read(key: _familyIdKey);
 
-	/// Removes both tokens from secure storage (e.g. on explicit logout).
+	/// Wipes the full session (tokens + user data) on logout.
 	Future<void> clearSession() => Future.wait([
 		_storage.delete(key: _authTokenKey),
 		_storage.delete(key: _refreshTokenKey),
+		_storage.delete(key: _usernameKey),
+		_storage.delete(key: _familyIdKey),
 	]);
 
 }
