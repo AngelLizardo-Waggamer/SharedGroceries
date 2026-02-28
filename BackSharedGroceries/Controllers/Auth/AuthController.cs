@@ -45,7 +45,7 @@ namespace BackSharedGroceries.Controllers.Auth
                 {
                     return BadRequest(ModelState);
                 }
-                return BadRequest("Invalid registering data.");
+                return BadRequest(new { message = "Invalid registering data." });
             }
 
             // Delegate registration logic to the service layer
@@ -55,9 +55,9 @@ namespace BackSharedGroceries.Controllers.Auth
             // This ensures proper REST semantics are followed
             return result.ResultType switch
             {
-                Common.ServiceResultType.Conflict => Conflict(result.ErrorMessage),      // 409 if username exists
-                Common.ServiceResultType.BadRequest => BadRequest(result.ErrorMessage),   // 400 for invalid data
-                _ => Ok("User registered successfully.")                                   // 200 for success
+                Common.ServiceResultType.Conflict => Conflict(new { message = result.ErrorMessage }),      // 409 if username exists
+                Common.ServiceResultType.BadRequest => BadRequest(new { message = result.ErrorMessage }),   // 400 for invalid data
+                _ => Ok(new { message = "User registered successfully." })                                   // 200 for success
             };
         }
 
@@ -80,7 +80,7 @@ namespace BackSharedGroceries.Controllers.Auth
                 {
                     return BadRequest(ModelState);
                 }
-                return BadRequest("Invalid credentials.");
+                return BadRequest(new { message = "Invalid credentials." });
             }
 
             // Delegate authentication logic to the service layer
@@ -90,10 +90,10 @@ namespace BackSharedGroceries.Controllers.Auth
             // Returns JWT and refresh token on success, or appropriate error code on failure
             return result.ResultType switch
             {
-                Common.ServiceResultType.Unauthorized => Unauthorized(result.ErrorMessage), // 401 for invalid credentials
-                Common.ServiceResultType.BadRequest => BadRequest(result.ErrorMessage),      // 400 for malformed request
-                Common.ServiceResultType.NotFound => NotFound(result.ErrorMessage),          // 404 if needed
-                _ => Ok(result.Data)                                                         // 200 with tokens on success
+                Common.ServiceResultType.Unauthorized => Unauthorized(new { message = result.ErrorMessage }), // 401 for invalid credentials
+                Common.ServiceResultType.BadRequest => BadRequest(new { message = result.ErrorMessage }),      // 400 for malformed request
+                Common.ServiceResultType.NotFound => NotFound(new { message = result.ErrorMessage }),          // 404 if needed
+                _ => Ok(result.Data)                                                                           // 200 with tokens on success
             };
         }
 
@@ -115,7 +115,7 @@ namespace BackSharedGroceries.Controllers.Auth
                 {
                     return BadRequest(ModelState);
                 }
-                return BadRequest("Invalid credentials.");
+                return BadRequest(new { message = "Invalid credentials." });
             }
 
             // Delegate token refresh logic to the service layer
@@ -125,10 +125,10 @@ namespace BackSharedGroceries.Controllers.Auth
             // Returns new JWT token on success, or error if refresh token is invalid/expired
             return result.ResultType switch
             {
-                Common.ServiceResultType.Unauthorized => Unauthorized(result.ErrorMessage), // 401 for invalid/expired token
-                Common.ServiceResultType.BadRequest => BadRequest(result.ErrorMessage),      // 400 for malformed request
-                Common.ServiceResultType.NotFound => NotFound(result.ErrorMessage),          // 404 if needed
-                _ => Ok(result.Data)                                                         // 200 with new JWT on success
+                Common.ServiceResultType.Unauthorized => Unauthorized(new { message = result.ErrorMessage }), // 401 for invalid/expired token
+                Common.ServiceResultType.BadRequest => BadRequest(new { message = result.ErrorMessage }),      // 400 for malformed request
+                Common.ServiceResultType.NotFound => NotFound(new { message = result.ErrorMessage }),          // 404 if needed
+                _ => Ok(result.Data)                                                                           // 200 with new JWT on success
             };
         }
     }

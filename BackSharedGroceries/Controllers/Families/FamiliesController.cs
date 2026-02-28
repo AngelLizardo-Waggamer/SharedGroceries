@@ -49,7 +49,7 @@ namespace BackSharedGroceries.Controllers.Families
                 {
                     return BadRequest(ModelState);
                 }
-                return BadRequest("Invalid family data.");
+                return BadRequest(new { message = "Invalid family data." });
             }
 
             // Delegate family creation logic to the service layer
@@ -59,9 +59,9 @@ namespace BackSharedGroceries.Controllers.Families
             // This ensures proper REST semantics are followed
             return result.ResultType switch
             {
-                Common.ServiceResultType.BadRequest => BadRequest(result.ErrorMessage),   // 400 for invalid data
-                Common.ServiceResultType.Unauthorized => Unauthorized(result.ErrorMessage), // 401 for auth issues
-                _ => Ok(result.Data)                                                       // 200 with family info on success
+                Common.ServiceResultType.BadRequest => BadRequest(new { message = result.ErrorMessage }),   // 400 for invalid data
+                Common.ServiceResultType.Unauthorized => Unauthorized(new { message = result.ErrorMessage }), // 401 for auth issues
+                _ => Ok(result.Data)                                                                         // 200 with family info on success
             };
         }
 
@@ -85,7 +85,7 @@ namespace BackSharedGroceries.Controllers.Families
                 {
                     return BadRequest(ModelState);
                 }
-                return BadRequest("Invalid invite code.");
+                return BadRequest(new { message = "Invalid invite code." });
             }
 
             // Delegate join family logic to the service layer
@@ -95,10 +95,10 @@ namespace BackSharedGroceries.Controllers.Families
             // This ensures proper REST semantics are followed
             return result.ResultType switch
             {
-                Common.ServiceResultType.NotFound => NotFound(result.ErrorMessage),         // 404 if family doesn't exist
-                Common.ServiceResultType.BadRequest => BadRequest(result.ErrorMessage),     // 400 for invalid data
-                Common.ServiceResultType.Unauthorized => Unauthorized(result.ErrorMessage), // 401 for auth issues
-                _ => Ok("Successfully joined the family.")                                  // 200 for success
+                Common.ServiceResultType.NotFound => NotFound(new { message = result.ErrorMessage }),         // 404 if family doesn't exist
+                Common.ServiceResultType.BadRequest => BadRequest(new { message = result.ErrorMessage }),     // 400 for invalid data
+                Common.ServiceResultType.Unauthorized => Unauthorized(new { message = result.ErrorMessage }), // 401 for auth issues
+                _ => Ok(new { message = "Successfully joined the family." })                                  // 200 for success
             };
         }
 
@@ -120,9 +120,9 @@ namespace BackSharedGroceries.Controllers.Families
             // This ensures proper REST semantics are followed
             return result.ResultType switch
             {
-                Common.ServiceResultType.BadRequest => BadRequest(result.ErrorMessage),     // 400 if user has no family
-                Common.ServiceResultType.Unauthorized => Unauthorized(result.ErrorMessage), // 401 for auth issues
-                _ => Ok("Successfully left the family.")                                    // 200 for success
+                Common.ServiceResultType.BadRequest => BadRequest(new { message = result.ErrorMessage }),     // 400 if user has no family
+                Common.ServiceResultType.Unauthorized => Unauthorized(new { message = result.ErrorMessage }), // 401 for auth issues
+                _ => Ok(new { message = "Successfully left the family." })                                    // 200 for success
             };
         }
     }

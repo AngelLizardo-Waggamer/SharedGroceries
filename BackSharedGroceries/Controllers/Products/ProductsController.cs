@@ -42,8 +42,8 @@ namespace BackSharedGroceries.Controllers.Products
 
             return result.ResultType switch
             {
-                Common.ServiceResultType.Unauthorized => Unauthorized(result.ErrorMessage),
-                Common.ServiceResultType.BadRequest => BadRequest(result.ErrorMessage),
+                Common.ServiceResultType.Unauthorized => Unauthorized(new { message = result.ErrorMessage }),
+                Common.ServiceResultType.BadRequest => BadRequest(new { message = result.ErrorMessage }),
                 _ => Ok(result.Data)
             };
         }
@@ -65,15 +65,15 @@ namespace BackSharedGroceries.Controllers.Products
                 {
                     return BadRequest(ModelState);
                 }
-                return BadRequest("Invalid product data.");
+                return BadRequest(new { message = "Invalid product data." });
             }
 
             var result = await _productService.AddProductAsync(dto);
 
             return result.ResultType switch
             {
-                Common.ServiceResultType.BadRequest => BadRequest(result.ErrorMessage),
-                Common.ServiceResultType.Unauthorized => Unauthorized(result.ErrorMessage),
+                Common.ServiceResultType.BadRequest => BadRequest(new { message = result.ErrorMessage }),
+                Common.ServiceResultType.Unauthorized => Unauthorized(new { message = result.ErrorMessage }),
                 _ => Ok(result.Data)
             };
         }
@@ -97,17 +97,17 @@ namespace BackSharedGroceries.Controllers.Products
                 {
                     return BadRequest(ModelState);
                 }
-                return BadRequest("Invalid product data.");
+                return BadRequest(new { message = "Invalid product data." });
             }
 
             var result = await _productService.UpdateProductAsync(dto);
 
             return result.ResultType switch
             {
-                Common.ServiceResultType.NotFound => NotFound(result.ErrorMessage),
-                Common.ServiceResultType.BadRequest => BadRequest(result.ErrorMessage),
-                Common.ServiceResultType.Unauthorized => Unauthorized(result.ErrorMessage),
-                Common.ServiceResultType.Conflict => Conflict(result.ErrorMessage),
+                Common.ServiceResultType.NotFound => NotFound(new { message = result.ErrorMessage }),
+                Common.ServiceResultType.BadRequest => BadRequest(new { message = result.ErrorMessage }),
+                Common.ServiceResultType.Unauthorized => Unauthorized(new { message = result.ErrorMessage }),
+                Common.ServiceResultType.Conflict => Conflict(new { message = result.ErrorMessage }),
                 _ => Ok(result.Data)
             };
         }
@@ -127,10 +127,10 @@ namespace BackSharedGroceries.Controllers.Products
 
             return result.ResultType switch
             {
-                Common.ServiceResultType.NotFound => NotFound(result.ErrorMessage),
-                Common.ServiceResultType.Unauthorized => Unauthorized(result.ErrorMessage),
-                Common.ServiceResultType.BadRequest => BadRequest(result.ErrorMessage),
-                _ => Ok()
+                Common.ServiceResultType.NotFound => NotFound(new { message = result.ErrorMessage }),
+                Common.ServiceResultType.Unauthorized => Unauthorized(new { message = result.ErrorMessage }),
+                Common.ServiceResultType.BadRequest => BadRequest(new { message = result.ErrorMessage }),
+                _ => Ok(new { message = "Product deleted successfully." })
             };
         }
 
@@ -151,15 +151,15 @@ namespace BackSharedGroceries.Controllers.Products
                 {
                     return BadRequest(ModelState);
                 }
-                return BadRequest("Invalid sync batch data.");
+                return BadRequest(new { message = "Invalid sync batch data." });
             }
 
             var result = await _productService.SyncBatchAsync(batch);
 
             return result.ResultType switch
             {
-                Common.ServiceResultType.BadRequest => BadRequest(result.ErrorMessage),
-                Common.ServiceResultType.Unauthorized => Unauthorized(result.ErrorMessage),
+                Common.ServiceResultType.BadRequest => BadRequest(new { message = result.ErrorMessage }),
+                Common.ServiceResultType.Unauthorized => Unauthorized(new { message = result.ErrorMessage }),
                 _ => Ok(result.Data)
             };
         }

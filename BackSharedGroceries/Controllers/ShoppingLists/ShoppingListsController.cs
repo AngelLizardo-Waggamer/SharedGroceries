@@ -48,7 +48,7 @@ namespace BackSharedGroceries.Controllers.ShoppingLists
                 {
                     return BadRequest(ModelState);
                 }
-                return BadRequest("Invalid shopping list data.");
+                return BadRequest(new { message = "Invalid shopping list data." });
             }
 
             // Delegate shopping list creation logic to the service layer
@@ -58,9 +58,9 @@ namespace BackSharedGroceries.Controllers.ShoppingLists
             // This ensures proper REST semantics are followed
             return result.ResultType switch
             {
-                Common.ServiceResultType.BadRequest => BadRequest(result.ErrorMessage),   // 400 for invalid data
-                Common.ServiceResultType.Unauthorized => Unauthorized(result.ErrorMessage), // 401 for auth issues
-                _ => Ok(result.Data)                                                       // 200 with shopping list info on success
+                Common.ServiceResultType.BadRequest => BadRequest(new { message = result.ErrorMessage }),   // 400 for invalid data
+                Common.ServiceResultType.Unauthorized => Unauthorized(new { message = result.ErrorMessage }), // 401 for auth issues
+                _ => Ok(result.Data)                                                                         // 200 with shopping list info on success
             };
         }
 
@@ -81,9 +81,9 @@ namespace BackSharedGroceries.Controllers.ShoppingLists
             // Map ServiceResult to appropriate HTTP status code using pattern matching
             return result.ResultType switch
             {
-                Common.ServiceResultType.BadRequest => BadRequest(result.ErrorMessage),     // 400 for invalid data
-                Common.ServiceResultType.Unauthorized => Unauthorized(result.ErrorMessage), // 401 for auth issues
-                _ => Ok(result.Data)                                                        // 200 with shopping lists on success
+                Common.ServiceResultType.BadRequest => BadRequest(new { message = result.ErrorMessage }),     // 400 for invalid data
+                Common.ServiceResultType.Unauthorized => Unauthorized(new { message = result.ErrorMessage }), // 401 for auth issues
+                _ => Ok(result.Data)                                                                          // 200 with shopping lists on success
             };
         }
 
@@ -107,10 +107,10 @@ namespace BackSharedGroceries.Controllers.ShoppingLists
             // This ensures proper REST semantics are followed
             return result.ResultType switch
             {
-                Common.ServiceResultType.NotFound => NotFound(result.ErrorMessage),         // 404 if list doesn't exist
-                Common.ServiceResultType.BadRequest => BadRequest(result.ErrorMessage),     // 400 for invalid data
-                Common.ServiceResultType.Unauthorized => Unauthorized(result.ErrorMessage), // 401 for auth issues
-                _ => Ok("Successfully soft deleted the shopping list.")                     // 200 for success
+                Common.ServiceResultType.NotFound => NotFound(new { message = result.ErrorMessage }),         // 404 if list doesn't exist
+                Common.ServiceResultType.BadRequest => BadRequest(new { message = result.ErrorMessage }),     // 400 for invalid data
+                Common.ServiceResultType.Unauthorized => Unauthorized(new { message = result.ErrorMessage }), // 401 for auth issues
+                _ => Ok(new { message = "Successfully soft deleted the shopping list." })                     // 200 for success
             };
         }
 
@@ -133,10 +133,10 @@ namespace BackSharedGroceries.Controllers.ShoppingLists
             // This ensures proper REST semantics are followed
             return result.ResultType switch
             {
-                Common.ServiceResultType.NotFound => NotFound(result.ErrorMessage),         // 404 if list doesn't exist
-                Common.ServiceResultType.BadRequest => BadRequest(result.ErrorMessage),     // 400 for invalid data
-                Common.ServiceResultType.Unauthorized => Unauthorized(result.ErrorMessage), // 401 for auth issues
-                _ => Ok("Successfully restored the shopping list.")                         // 200 for success
+                Common.ServiceResultType.NotFound => NotFound(new { message = result.ErrorMessage }),         // 404 if list doesn't exist
+                Common.ServiceResultType.BadRequest => BadRequest(new { message = result.ErrorMessage }),     // 400 for invalid data
+                Common.ServiceResultType.Unauthorized => Unauthorized(new { message = result.ErrorMessage }), // 401 for auth issues
+                _ => Ok(new { message = "Successfully restored the shopping list." })                         // 200 for success
             };
         }
 
@@ -160,10 +160,10 @@ namespace BackSharedGroceries.Controllers.ShoppingLists
             // This ensures proper REST semantics are followed
             return result.ResultType switch
             {
-                Common.ServiceResultType.NotFound => NotFound(result.ErrorMessage),         // 404 if list doesn't exist
-                Common.ServiceResultType.BadRequest => BadRequest(result.ErrorMessage),     // 400 for invalid data
-                Common.ServiceResultType.Unauthorized => Unauthorized(result.ErrorMessage), // 401 for auth issues
-                _ => Ok("Successfully updated the shopping list status.")                   // 200 for success
+                Common.ServiceResultType.NotFound => NotFound(new { message = result.ErrorMessage }),         // 404 if list doesn't exist
+                Common.ServiceResultType.BadRequest => BadRequest(new { message = result.ErrorMessage }),     // 400 for invalid data
+                Common.ServiceResultType.Unauthorized => Unauthorized(new { message = result.ErrorMessage }), // 401 for auth issues
+                _ => Ok(new { message = "Successfully updated the shopping list status." })                   // 200 for success
             };
         }
     }
