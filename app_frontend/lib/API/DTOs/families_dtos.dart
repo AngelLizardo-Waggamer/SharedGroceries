@@ -30,6 +30,13 @@ class JoinFamilyDTO extends DTO {
 	}
 }
 
+class GetFamilyDTO extends DTO {
+	@override
+	Map<String, dynamic> toJson() {
+		return {};
+	}
+}
+
 class LeaveFamilyDTO extends DTO {
 	@override
 	Map<String, dynamic> toJson() {

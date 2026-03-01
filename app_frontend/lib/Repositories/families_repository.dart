@@ -12,6 +12,25 @@ class FamiliesRepository {
 
   // ─── Actions ──────────────────────────────────────────────────────────────
 
+  /// Fetches the user's current family data. Throws [RepositoryException] on failure.
+  Future<FamilyResponseDTO> getFamilyData() async {
+    try {
+      final response = await _apiClient.familiesRequest(
+        FamiliesRoutes.get,
+        GetFamilyDTO(),
+      );
+      return FamilyResponseDTO.fromJson(
+        response.data as Map<String, dynamic>,
+      );
+    } on DioException catch (e) {
+      throw RepositoryException(dioErrorMessage(e));
+    } catch (e) {
+      throw RepositoryException(
+        unexpectedErrorMessage(e, 'FamiliesRepository.getFamilyData'),
+      );
+    }
+  }
+
   /// Creates a new family and returns its data. Throws [RepositoryException] on failure.
   Future<FamilyResponseDTO> create(String familyName) async {
     try {

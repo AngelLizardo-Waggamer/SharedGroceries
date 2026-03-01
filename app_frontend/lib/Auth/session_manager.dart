@@ -55,6 +55,9 @@ class SessionManager {
 	/// Returns null when the user has no family yet.
 	Future<String?> getFamilyId() => _storage.read(key: _familyIdKey);
 
+	/// Removes only the familyId when the user leaves their family.
+	Future<void> clearFamilyId() => _storage.delete(key: _familyIdKey);
+
 	/// Wipes the full session (tokens + user data) on logout.
 	Future<void> clearSession() => Future.wait([
 		_storage.delete(key: _authTokenKey),
