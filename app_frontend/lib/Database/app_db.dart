@@ -1,5 +1,6 @@
 import 'dart:io';
 
+import 'package:app_frontend/Database/DAOs/daos.dart';
 import 'package:app_frontend/Database/tables.dart';
 import 'package:drift/drift.dart';
 import 'package:drift/native.dart';
@@ -10,7 +11,7 @@ part 'app_db.g.dart';
 
 @DriftDatabase(
 	tables: [LocalFamilies, LocalShoppingLists, LocalProducts, LocalSuggestions],
-	daos: []
+	daos: [FamiliesDao, ShoppingListsDao, ProductsDao, SuggestionsDao],
 )
 class AppDatabase extends _$AppDatabase{
 	AppDatabase() : super(_openConnection());
