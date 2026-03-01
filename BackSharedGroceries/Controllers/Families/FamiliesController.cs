@@ -125,5 +125,30 @@ namespace BackSharedGroceries.Controllers.Families
                 _ => Ok(new { message = "Successfully left the family." })                                    // 200 for success
             };
         }
+
+        /// <summary>
+        /// Retrieves the family information for the authenticated user.
+        /// </summary>
+        /// <returns>Family information including ID, name, and invite code</returns>
+        /// <response code="200">The family information was retrieved successfully.</response>
+        /// <response code="401">The user is not authenticated.</response>
+        /// <response code="404">The user is not part of any family.</response>
+        [HttpGet("v1/user-family")]
+        public async Task<IActionResult> GetUserFamily()
+        {
+            // Delegate get user family logic to the service layer
+            // No request body needed as the user ID is obtained from the authentication token
+            var result = await _familyService.GetUserFamilyAsync();
+
+            // Map ServiceResult to appropriate HTTP status code using pattern matching
+            // This ensures proper REST semantics are followed
+            return result.ResultType switch
+            {
+                Common.ServiceResultType.NotFound => NotFound(new { message = result.ErrorMessage }),         // 404 if user has no family
+                Common.ServiceResultType.BadRequest => BadRequest(new { message = result.ErrorMessage }),       // 400 for invalid data
+                Common.ServiceResultType.Unauthorized => Unauthorized(new { message = result.ErrorMessage }),   // 401 for auth issues
+                _ => Ok(result.Data)                                                                            // 200 with family info on success
+            };
+        }
     }
 }

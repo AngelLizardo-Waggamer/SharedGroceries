@@ -119,5 +119,18 @@ namespace BackSharedGroceries.Repositories
                 await _context.SaveChangesAsync();
             }
         }
+
+        /// <summary>
+        /// Retrieves a family by the user ID.
+        /// </summary>
+        /// <param name="userId">The ID of the user.</param>
+        /// <returns>The family entity if the user belongs to a family, otherwise null.</returns>
+        public async Task<Family?> GetFamilyByUserIdAsync(Guid userId)
+        {
+            return await _context.Users
+                .Where(u => u.Id == userId)
+                .Select(u => u.Family)
+                .FirstOrDefaultAsync();
+        }
     }
 }

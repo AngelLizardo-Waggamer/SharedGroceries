@@ -52,5 +52,12 @@ namespace BackSharedGroceries.Interfaces.Repositories
         /// </summary>
         /// <param name="familyId">The ID of the family to delete.</param>
         Task DeleteFamilyAsync(Guid familyId);
+
+        /// <summary>
+        /// Retrieves a family by the user ID.
+        /// </summary>
+        /// <param name="userId">The ID of the user.</param>
+        /// <returns>The family entity if the user belongs to a family, otherwise null.</returns>
+        Task<Family?> GetFamilyByUserIdAsync(Guid userId);
     }
 }

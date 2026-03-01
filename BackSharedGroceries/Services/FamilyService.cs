@@ -167,6 +167,41 @@ namespace BackSharedGroceries.Services
         }
 
         /// <summary>
+        /// Retrieves the family information for the authenticated user.
+        /// </summary>
+        /// <returns>Service result containing the user's family information.</returns>
+        public async Task<ServiceResult<FamilyResponse>> GetUserFamilyAsync()
+        {
+            // Get the user ID from the HTTP context
+            Guid userId;
+            try
+            {
+                userId = GetUserId();
+            }
+            catch (Exception ex)
+            {
+                return ServiceResult<FamilyResponse>.BadRequest(ex.Message);
+            }
+
+            // Retrieve the family associated with the user
+            var family = await _familyRepository.GetFamilyByUserIdAsync(userId);
+
+            // If the user is not part of any family, return not found
+            if (family == null)
+            {
+                return ServiceResult<FamilyResponse>.NotFound("User is not part of any family.");
+            }
+
+            // Return the family information
+            return ServiceResult<FamilyResponse>.Ok(new FamilyResponse
+            {
+                Id = family.FamilyId,
+                Name = family.FamilyName,
+                InviteCode = family.FamilyInviteCode
+            });
+        }
+
+        /// <summary>
         /// Returns the user Guid parsed from the HttpContext claims.
         /// </summary>
         /// <returns>User Guid object</returns>

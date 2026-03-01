@@ -28,5 +28,11 @@ namespace BackSharedGroceries.Interfaces.Services
         /// </summary>
         /// <returns>Service result indicating the success or failure of the leave operation.</returns>
         Task<ServiceResult> LeaveFamilyAsync();
+
+        /// <summary>
+        /// Retrieves the family information for the authenticated user.
+        /// </summary>
+        /// <returns>Service result containing the user's family information.</returns>
+        Task<ServiceResult<FamilyResponse>> GetUserFamilyAsync();
     }
 }
