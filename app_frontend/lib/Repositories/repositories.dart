@@ -3,6 +3,7 @@ import 'package:app_frontend/Auth/session_manager.dart';
 import 'package:app_frontend/Repositories/auth_repository.dart';
 import 'package:app_frontend/Repositories/families_repository.dart';
 import 'package:app_frontend/Repositories/products_repository.dart';
+import 'package:app_frontend/Repositories/shopping_lists_repository.dart';
 
 /// Single entry point for all repositories.
 ///
@@ -13,6 +14,7 @@ class Repositories {
   final AuthRepository auth;
   final FamiliesRepository families;
   final ProductsRepository products;
+  final ShoppingListsRepository shoppingLists;
 
   Repositories({
     required ApiClient apiClient,
@@ -22,5 +24,6 @@ class Repositories {
           sessionManager: sessionManager,
         ),
         families = FamiliesRepository(apiClient: apiClient),
-        products = ProductsRepository(apiClient: apiClient);
+        products = ProductsRepository(apiClient: apiClient),
+        shoppingLists = ShoppingListsRepository(apiClient: apiClient);
 }
