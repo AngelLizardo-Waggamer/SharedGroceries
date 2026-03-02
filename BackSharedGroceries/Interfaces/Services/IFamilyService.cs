@@ -21,7 +21,7 @@ namespace BackSharedGroceries.Interfaces.Services
         /// </summary>
         /// <param name="request">The request object containing the invite code.</param>
         /// <returns>Service result indicating the success or failure of the join operation.</returns>
-        Task<ServiceResult> JoinFamilyAsync(JoinFamilyRequest request);
+        Task<ServiceResult<FamilyResponse>> JoinFamilyAsync(JoinFamilyRequest request);
 
         /// <summary>
         /// Allows an authenticated user to leave their current family.

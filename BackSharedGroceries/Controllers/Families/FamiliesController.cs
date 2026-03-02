@@ -98,7 +98,7 @@ namespace BackSharedGroceries.Controllers.Families
                 Common.ServiceResultType.NotFound => NotFound(new { message = result.ErrorMessage }),         // 404 if family doesn't exist
                 Common.ServiceResultType.BadRequest => BadRequest(new { message = result.ErrorMessage }),     // 400 for invalid data
                 Common.ServiceResultType.Unauthorized => Unauthorized(new { message = result.ErrorMessage }), // 401 for auth issues
-                _ => Ok(new { message = "Successfully joined the family." })                                  // 200 for success
+                _ => Ok(result.Data)                                  // 200 for success
             };
         }
 

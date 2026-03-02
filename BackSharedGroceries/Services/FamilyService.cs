@@ -85,7 +85,7 @@ namespace BackSharedGroceries.Services
         /// </summary>
         /// <param name="request"></param>
         /// <returns>Service result indicating the success or failure of the join operation.</returns>
-        public async Task<ServiceResult> JoinFamilyAsync(JoinFamilyRequest request)
+        public async Task<ServiceResult<FamilyResponse>> JoinFamilyAsync(JoinFamilyRequest request)
         {
 
             // Get the user ID from the HTTP context
@@ -98,14 +98,14 @@ namespace BackSharedGroceries.Services
             }
             catch (Exception ex)
             {
-                return ServiceResult.BadRequest(ex.Message);
+                return ServiceResult<FamilyResponse>.BadRequest(ex.Message);
             }
 
             // Check if user already belongs to a family
             var currentFamilyId = await _familyRepository.GetUserFamilyIdAsync(userId);
             if (currentFamilyId != null)
             {
-                return ServiceResult.BadRequest("User already belongs to a family.");
+                return ServiceResult<FamilyResponse>.BadRequest("User already belongs to a family.");
             }
 
             // Normalize the invite code (remove hyphens and convert to uppercase)
@@ -116,12 +116,17 @@ namespace BackSharedGroceries.Services
 
             // If there is no family with the provided invite code, return not found
             if (family == null) {
-                return ServiceResult.NotFound("Family with the provided invite code does not exist.");
+                return ServiceResult<FamilyResponse>.NotFound("Family with the provided invite code does not exist.");
             }
 
             // Assign the user to the found family
             await _familyRepository.UpdateUserFamilyAsync(userId, family.FamilyId);
-            return ServiceResult.Ok();
+            return ServiceResult<FamilyResponse>.Ok(new FamilyResponse
+            {
+                Id = family.FamilyId,
+                Name = family.FamilyName,
+                InviteCode = family.FamilyInviteCode  
+            });
         }
 
         /// <summary>
