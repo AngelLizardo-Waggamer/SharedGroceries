@@ -63,6 +63,8 @@ class AuthRepository {
         AuthRoutes.register,
         RegisterDTO(username: username, password: password),
       );
+
+      login(username, password); // Auto-login after successful registration
     } on DioException catch (e) {
       throw RepositoryException(dioErrorMessage(e));
     } catch (e) {
