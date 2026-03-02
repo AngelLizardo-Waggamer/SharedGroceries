@@ -211,10 +211,14 @@ class _FamilyBody extends StatelessWidget {
           'Si abandonas la familia, necesitarás el código de invitación para volver a unirte. ¿Estás seguro?',
         ),
         actions: [
-          TextButton(
+          FilledButton(
             onPressed: () => Navigator.of(dialogContext).pop(),
+            style: FilledButton.styleFrom(
+              backgroundColor: Theme.of(context).colorScheme.secondary,
+            ),
             child: const Text('Cancelar'),
           ),
+          SizedBox(height: 10,),
           FilledButton(
             onPressed: () {
               Navigator.of(dialogContext).pop();
