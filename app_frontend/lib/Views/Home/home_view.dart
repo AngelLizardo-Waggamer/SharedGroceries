@@ -4,6 +4,7 @@ import 'package:app_frontend/Routes/routes.dart';
 import 'package:app_frontend/Views/Home/home_controller.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter/scheduler.dart';
+import 'package:intl/intl.dart';
 import 'package:provider/provider.dart';
 
 /// Entry point for the home screen.
@@ -76,21 +77,39 @@ class _HomeBodyState extends State<_HomeBody> {
 
     return Scaffold(
       appBar: AppBar(
-        title: const Text('Mis listas'),
+        title: Text(
+          controller.isSelectionMode
+              ? '${controller.selectedListIds.length} seleccionado(s)'
+              : 'Mis listas',
+        ),
         centerTitle: true,
-        leading: const Icon(Icons.local_grocery_store),
+        leading: controller.isSelectionMode
+            ? IconButton(
+                icon: const Icon(Icons.close),
+                onPressed: () => controller.clearSelection(),
+              )
+            : const Icon(Icons.local_grocery_store),
         actions: [
-          PopupMenuButton<String>(
-            itemBuilder: _buildPopupMenuItems,
-            onSelected: (value) => _handleMenuSelection(context, value),
-          ),
+          if (!controller.isSelectionMode)
+            PopupMenuButton<String>(
+              itemBuilder: _buildPopupMenuItems,
+              onSelected: (value) => _handleMenuSelection(context, value),
+            ),
         ],
       ),
       body: _buildBody(controller),
       floatingActionButton: controller.shoppingLists.isNotEmpty
           ? FloatingActionButton(
-              onPressed: () => _showCreateListModal(context),
-              child: const Icon(Icons.add),
+              onPressed: controller.isSelectionMode
+                  ? () => _confirmDeleteLists(context)
+                  : () => _showCreateListModal(context),
+              backgroundColor: controller.isSelectionMode
+                  ? Theme.of(context).colorScheme.error
+                  : null,
+              child: Icon(
+                controller.isSelectionMode ? Icons.delete : Icons.add,
+                color: controller.isSelectionMode ? Theme.of(context).colorScheme.onError : null,
+              ),
             )
           : null,
     );
@@ -138,15 +157,35 @@ class _HomeBodyState extends State<_HomeBody> {
       itemCount: controller.shoppingLists.length,
       itemBuilder: (context, index) {
         final list = controller.shoppingLists[index];
+        final isSelected = controller.isListSelected(list.id);
+        
         return ListTile(
+          leading: controller.isSelectionMode
+              ? Checkbox(
+                  value: isSelected,
+                  onChanged: (_) => controller.toggleSelection(list.id),
+                )
+              : null,
           title: Text(list.name),
           subtitle: Text(
-            'Creada: ${_formatDate(list.createdAt)}',
+            'Creada el ${_formatDate(list.createdAt)}',
             style: Theme.of(context).textTheme.bodySmall,
           ),
-          trailing: const Icon(Icons.arrow_forward_ios),
+          trailing: controller.isSelectionMode
+              ? null
+              : const Icon(Icons.arrow_forward_ios),
+          selected: isSelected,
           onTap: () {
-            // TODO: Navigate to list details
+            if (controller.isSelectionMode) {
+              controller.toggleSelection(list.id);
+            } else {
+              // TODO: Navigate to list details
+            }
+          },
+          onLongPress: () {
+            if (!controller.isSelectionMode) {
+              controller.toggleSelection(list.id);
+            }
           },
         );
       },
@@ -209,7 +248,61 @@ class _HomeBodyState extends State<_HomeBody> {
   }
 
   String _formatDate(DateTime date) {
-    return '${date.day}/${date.month}/${date.year}';
+    return DateFormat('dd/MM/yyyy').format(date);
+  }
+
+  /// Shows a confirmation dialog before deleting selected lists.
+  void _confirmDeleteLists(BuildContext context) {
+    final controller = context.read<HomeController>();
+    final count = controller.selectedListIds.length;
+
+    showDialog(
+      context: context,
+      builder: (dialogContext) => AlertDialog(
+        title: const Text('Eliminar listas'),
+        content: Text(
+          count == 1
+              ? '¿Estás seguro de que deseas eliminar esta lista?'
+              : '¿Estás seguro de que deseas eliminar $count listas?',
+        ),
+        actions: [
+          TextButton(
+            onPressed: () => Navigator.of(dialogContext).pop(),
+            child: const Text('Cancelar'),
+          ),
+          TextButton(
+            onPressed: () async {
+              Navigator.of(dialogContext).pop();
+              await _deleteSelectedLists(context);
+            },
+            child: const Text('Eliminar'),
+          ),
+        ],
+      ),
+    );
+  }
+
+  /// Deletes the selected lists and shows a result message.
+  Future<void> _deleteSelectedLists(BuildContext context) async {
+    final controller = context.read<HomeController>();
+    final count = controller.selectedListIds.length;
+    final success = await controller.deleteSelectedLists();
+
+    if (!context.mounted) return;
+
+    if (success) {
+      _showSnackBar(
+        context,
+        count == 1
+            ? 'Lista eliminada exitosamente'
+            : '$count listas eliminadas exitosamente',
+      );
+    } else {
+      _showSnackBar(
+        context,
+        controller.errorMessage ?? 'Error al eliminar las listas',
+      );
+    }
   }
 
   void _showSnackBar(BuildContext context, String message) {

@@ -22,6 +22,7 @@ class HomeController extends ChangeNotifier {
   List<ShoppingListResponseDTO> _shoppingLists = [];
   bool _hasCheckedFamily = false;
   bool _needsOnboarding = false; // If true, user should be redirected to onboarding
+  Set<String> _selectedListIds = {}; // IDs of selected shopping lists
 
   bool get isLoading => _isLoading;
   bool get isCreatingList => _isCreatingList;
@@ -29,6 +30,8 @@ class HomeController extends ChangeNotifier {
   List<ShoppingListResponseDTO> get shoppingLists => _shoppingLists;
   bool get hasCheckedFamily => _hasCheckedFamily;
   bool get needsOnboarding => _needsOnboarding;
+  Set<String> get selectedListIds => _selectedListIds;
+  bool get isSelectionMode => _selectedListIds.isNotEmpty;
 
   // ─── Constructor ──────────────────────────────────────────────────────────
 
@@ -86,6 +89,57 @@ class HomeController extends ChangeNotifier {
       return false;
     } finally {
       _isCreatingList = false;
+      notifyListeners();
+    }
+  }
+
+  /// Toggles selection of a shopping list by its ID.
+  void toggleSelection(String listId) {
+    if (_selectedListIds.contains(listId)) {
+      _selectedListIds.remove(listId);
+    } else {
+      _selectedListIds.add(listId);
+    }
+    notifyListeners();
+  }
+
+  /// Clears all selected items and exits selection mode.
+  void clearSelection() {
+    _selectedListIds.clear();
+    notifyListeners();
+  }
+
+  /// Checks if a list is currently selected.
+  bool isListSelected(String listId) {
+    return _selectedListIds.contains(listId);
+  }
+
+  /// Deletes all selected shopping lists. Returns true if all deletions were successful.
+  Future<bool> deleteSelectedLists() async {
+    if (_selectedListIds.isEmpty) return false;
+
+    _isLoading = true;
+    _errorMessage = null;
+    notifyListeners();
+
+    try {
+      // Delete each selected list
+      for (final listId in _selectedListIds) {
+        await _repository.delete(listId);
+      }
+
+      // Remove deleted lists from the local list
+      _shoppingLists.removeWhere((list) => _selectedListIds.contains(list.id));
+      
+      // Clear selection
+      _selectedListIds.clear();
+      
+      return true;
+    } on RepositoryException catch (e) {
+      _errorMessage = e.message;
+      return false;
+    } finally {
+      _isLoading = false;
       notifyListeners();
     }
   }
