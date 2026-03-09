@@ -70,9 +70,7 @@ class _HomeBodyState extends State<_HomeBody> {
 
     // Show loading indicator while checking family status
     if (!controller.hasCheckedFamily) {
-      return const Scaffold(
-        body: Center(child: CircularProgressIndicator()),
-      );
+      return const Scaffold(body: Center(child: CircularProgressIndicator()));
     }
 
     return Scaffold(
@@ -108,7 +106,9 @@ class _HomeBodyState extends State<_HomeBody> {
                   : null,
               child: Icon(
                 controller.isSelectionMode ? Icons.delete : Icons.add,
-                color: controller.isSelectionMode ? Theme.of(context).colorScheme.onError : null,
+                color: controller.isSelectionMode
+                    ? Theme.of(context).colorScheme.onError
+                    : null,
               ),
             )
           : null,
@@ -154,39 +154,95 @@ class _HomeBodyState extends State<_HomeBody> {
 
     // Show list of shopping lists
     return ListView.builder(
+      padding: const EdgeInsets.symmetric(horizontal: 8, vertical: 8),
       itemCount: controller.shoppingLists.length,
       itemBuilder: (context, index) {
         final list = controller.shoppingLists[index];
         final isSelected = controller.isListSelected(list.id);
-        
-        return ListTile(
-          leading: controller.isSelectionMode
-              ? Checkbox(
-                  value: isSelected,
-                  onChanged: (_) => controller.toggleSelection(list.id),
-                )
-              : null,
-          title: Text(list.name),
-          subtitle: Text(
-            'Creada el ${_formatDate(list.createdAt)}',
-            style: Theme.of(context).textTheme.bodySmall,
+
+        return Padding(
+          padding: const EdgeInsets.symmetric(vertical: 8),
+          child: Card(
+            elevation: isSelected ? 3 : 1,
+            color: isSelected
+                ? Theme.of(
+                    context,
+                  ).colorScheme.primaryContainer.withValues(alpha: 0.35)
+                : null,
+            child: InkWell(
+              borderRadius: BorderRadius.circular(12),
+              onTap: () {
+                if (controller.isSelectionMode) {
+                  controller.toggleSelection(list.id);
+                } else {
+                  // TODO: Navigate to list details
+                }
+              },
+              onLongPress: () {
+                if (!controller.isSelectionMode) {
+                  controller.toggleSelection(list.id);
+                }
+              },
+              child: ConstrainedBox(
+                constraints: const BoxConstraints(minHeight: 90),
+                child: Padding(
+                  padding: const EdgeInsets.symmetric(
+                    horizontal: 16,
+                    vertical: 14,
+                  ),
+                  child: Row(
+                    children: [
+                      Icon(
+                        Icons.shopping_bag_outlined,
+                        size: 30,
+                        color: Theme.of(context).colorScheme.primary,
+                      ),
+                      const SizedBox(width: 14),
+                      Expanded(
+                        child: Column(
+                          mainAxisAlignment: MainAxisAlignment.center,
+                          crossAxisAlignment: CrossAxisAlignment.start,
+                          children: [
+                            Text(
+                              list.name,
+                              style: Theme.of(
+                                context,
+                              ).textTheme.titleMedium?.copyWith(fontSize: 18),
+                              maxLines: 1,
+                              overflow: TextOverflow.ellipsis,
+                            ),
+                            const SizedBox(height: 6),
+                            Text(
+                              'Creada el ${_formatDate(list.createdAt)}',
+                              style: Theme.of(
+                                context,
+                              ).textTheme.bodyMedium?.copyWith(fontSize: 15),
+                              maxLines: 1,
+                              overflow: TextOverflow.ellipsis,
+                            ),
+                          ],
+                        ),
+                      ),
+                      if (controller.isSelectionMode)
+                        Icon(
+                          isSelected
+                              ? Icons.check_circle
+                              : Icons.radio_button_unchecked,
+                          size: 24,
+                          color: isSelected
+                              ? Theme.of(context).colorScheme.primary
+                              : Theme.of(
+                                  context,
+                                ).colorScheme.onSurface.withValues(alpha: 0.45),
+                        )
+                      else
+                        const Icon(Icons.arrow_forward_ios, size: 22),
+                    ],
+                  ),
+                ),
+              ),
+            ),
           ),
-          trailing: controller.isSelectionMode
-              ? null
-              : const Icon(Icons.arrow_forward_ios),
-          selected: isSelected,
-          onTap: () {
-            if (controller.isSelectionMode) {
-              controller.toggleSelection(list.id);
-            } else {
-              // TODO: Navigate to list details
-            }
-          },
-          onLongPress: () {
-            if (!controller.isSelectionMode) {
-              controller.toggleSelection(list.id);
-            }
-          },
         );
       },
     );
@@ -326,7 +382,8 @@ class _CreateListModal extends StatelessWidget {
     return SingleChildScrollView(
       child: Padding(
         padding: EdgeInsets.only(
-          bottom: MediaQuery.of(context).viewInsets.bottom +
+          bottom:
+              MediaQuery.of(context).viewInsets.bottom +
               MediaQuery.of(context).size.height * 0.02,
           left: 20,
           right: 20,
@@ -353,8 +410,8 @@ class _CreateListModal extends StatelessWidget {
               Text(
                 controller.errorMessage!,
                 style: Theme.of(context).textTheme.bodySmall?.copyWith(
-                      color: Theme.of(context).colorScheme.error,
-                    ),
+                  color: Theme.of(context).colorScheme.error,
+                ),
               ),
             ],
             const SizedBox(height: 20),
