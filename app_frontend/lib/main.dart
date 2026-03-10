@@ -56,6 +56,7 @@ class MainApp extends StatelessWidget {
 				Provider<AppDatabase>.value(value: database),
 			],
 			child: MaterialApp(
+                debugShowCheckedModeBanner: false,
 				title: 'Shared Groceries',
 				themeMode: .light,
 				theme: AppTheme.light,
