@@ -22,7 +22,7 @@ class HomeController extends ChangeNotifier {
   List<ShoppingListResponseDTO> _shoppingLists = [];
   bool _hasCheckedFamily = false;
   bool _needsOnboarding = false; // If true, user should be redirected to onboarding
-  Set<String> _selectedListIds = {}; // IDs of selected shopping lists
+  final Set<String> _selectedListIds = {}; // IDs of selected shopping lists
 
   bool get isLoading => _isLoading;
   bool get isCreatingList => _isCreatingList;
