@@ -10,6 +10,7 @@ class Routes {
   static String get onboarding => '/onboarding';
   static String get profile => '/profile';
   static String get family => '/family';
+  static String get shoppingList => '/shopping-list';
 
 	static Map<String, WidgetBuilder> get routes => {
 		home: (context) => const HomeView(),
@@ -18,5 +19,14 @@ class Routes {
 		onboarding: (context) => const OnboardingView(),
 		profile: (context) => const ProfileView(),
 		family: (context) => const FamilyView(),
+    shoppingList: (context) {
+			final args = ModalRoute.of(context)?.settings.arguments;
+			final routeArgs = args is Map<String, String> ? args : const <String, String>{};
+
+			return ShoppingListView(
+				listId: routeArgs['listId'] ?? '',
+				listName: routeArgs['listName'] ?? 'Lista',
+			);
+		},
 	};
 }

@@ -175,7 +175,13 @@ class _HomeBodyState extends State<_HomeBody> {
                 if (controller.isSelectionMode) {
                   controller.toggleSelection(list.id);
                 } else {
-                  // TODO: Navigate to list details
+                  Navigator.of(context).pushNamed(
+                    Routes.shoppingList,
+                    arguments: {
+                      'listId': list.id,
+                      'listName': list.name,
+                    },
+                  );
                 }
               },
               onLongPress: () {
