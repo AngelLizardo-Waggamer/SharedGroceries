@@ -1,4 +1,5 @@
 import 'package:app_frontend/Auth/session_manager.dart';
+import 'package:app_frontend/API/signal_r_client.dart';
 import 'package:app_frontend/Repositories/repositories.dart';
 import 'package:app_frontend/Routes/routes.dart';
 import 'package:app_frontend/Views/Family/family_controller.dart';
@@ -17,6 +18,7 @@ class FamilyView extends StatelessWidget {
       create: (ctx) => FamilyController(
         repository: ctx.read<Repositories>().families,
         sessionManager: ctx.read<SessionManager>(),
+        signalRClient: ctx.read<SignalRClient>(),
       ),
       child: const _FamilyBody(),
     );

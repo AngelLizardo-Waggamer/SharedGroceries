@@ -1,3 +1,4 @@
+import 'package:app_frontend/API/signal_r_client.dart';
 import 'package:app_frontend/Auth/session_manager.dart';
 import 'package:flutter/widgets.dart';
 
@@ -5,6 +6,7 @@ import 'package:flutter/widgets.dart';
 /// Manages user profile display and logout flow.
 class ProfileController extends ChangeNotifier {
   final SessionManager _sessionManager;
+  final SignalRClient _signalRClient;
 
   // ─── UI state ─────────────────────────────────────────────────────────────
 
@@ -18,8 +20,11 @@ class ProfileController extends ChangeNotifier {
 
   // ─── Constructor ──────────────────────────────────────────────────────────
 
-  ProfileController({required SessionManager sessionManager})
-      : _sessionManager = sessionManager {
+  ProfileController({
+    required SessionManager sessionManager,
+    required SignalRClient signalRClient,
+  })  : _sessionManager = sessionManager,
+        _signalRClient = signalRClient {
     _loadUserData();
   }
 
@@ -46,6 +51,7 @@ class ProfileController extends ChangeNotifier {
     notifyListeners();
 
     try {
+      await _signalRClient.disconnect(disposeConnection: true);
       await _sessionManager.clearSession();
       return true;
     } catch (e) {

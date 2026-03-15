@@ -1,4 +1,5 @@
 import 'package:app_frontend/Auth/session_manager.dart';
+import 'package:app_frontend/API/signal_r_client.dart';
 import 'package:app_frontend/Repositories/repositories.dart';
 import 'package:app_frontend/Routes/routes.dart';
 import 'package:app_frontend/Views/Home/home_controller.dart';
@@ -18,6 +19,7 @@ class HomeView extends StatelessWidget {
       create: (ctx) => HomeController(
         repository: ctx.read<Repositories>().shoppingLists,
         sessionManager: ctx.read<SessionManager>(),
+        signalRClient: ctx.read<SignalRClient>(),
       ),
       child: const _HomeBody(),
     );
@@ -55,6 +57,17 @@ class _HomeBodyState extends State<_HomeBody> {
     if (controller.needsOnboarding) {
       Navigator.of(context).pushReplacementNamed(Routes.onboarding);
       return;
+    }
+
+    final isRealtimeConnected = await controller.ensureRealtimeConnected();
+
+    if (!mounted) return;
+
+    if (!isRealtimeConnected) {
+      _showSnackBar(
+        context,
+        'La funcionalidad en tiempo real no está disponible por ahora.',
+      );
     }
 
     // Show welcome message

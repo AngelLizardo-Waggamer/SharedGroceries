@@ -1,4 +1,5 @@
 import 'package:app_frontend/API/DTOs/Responses/responses.dart';
+import 'package:app_frontend/API/signal_r_client.dart';
 import 'package:app_frontend/Auth/session_manager.dart';
 import 'package:app_frontend/Repositories/repository_exception.dart';
 import 'package:app_frontend/Repositories/shopping_lists_repository.dart';
@@ -9,6 +10,7 @@ import 'package:flutter/widgets.dart';
 class HomeController extends ChangeNotifier {
   final ShoppingListsRepository _repository;
   final SessionManager _sessionManager;
+  final SignalRClient _signalRClient;
 
   // ─── Form fields ──────────────────────────────────────────────────────────
 
@@ -38,8 +40,10 @@ class HomeController extends ChangeNotifier {
   HomeController({
     required ShoppingListsRepository repository,
     required SessionManager sessionManager,
+    required SignalRClient signalRClient,
   })  : _repository = repository,
-        _sessionManager = sessionManager;
+        _sessionManager = sessionManager,
+        _signalRClient = signalRClient;
 
   // ─── Actions ──────────────────────────────────────────────────────────────
 
@@ -50,6 +54,13 @@ class HomeController extends ChangeNotifier {
     _needsOnboarding = (familyId == null);
     _hasCheckedFamily = true;
     notifyListeners();
+  }
+
+  /// Ensures the SignalR connection is active for realtime updates.
+  /// Returns true when connected or false when unavailable.
+  Future<bool> ensureRealtimeConnected() async {
+    if (_needsOnboarding) return false;
+    return _signalRClient.connect();
   }
 
   /// Fetches active shopping lists. Throws [RepositoryException] on failure.

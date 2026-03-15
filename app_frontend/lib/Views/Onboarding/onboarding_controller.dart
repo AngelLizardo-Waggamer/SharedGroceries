@@ -1,3 +1,4 @@
+import 'package:app_frontend/API/signal_r_client.dart';
 import 'package:app_frontend/Auth/session_manager.dart';
 import 'package:app_frontend/Repositories/families_repository.dart';
 import 'package:app_frontend/Repositories/repository_exception.dart';
@@ -8,6 +9,7 @@ import 'package:flutter/widgets.dart';
 class OnboardingController extends ChangeNotifier {
   final FamiliesRepository _repository;
   final SessionManager _sessionManager;
+  final SignalRClient _signalRClient;
 
   // ─── Form fields ──────────────────────────────────────────────────────────
 
@@ -31,8 +33,10 @@ class OnboardingController extends ChangeNotifier {
   OnboardingController({
     required FamiliesRepository repository,
     required SessionManager sessionManager,
+    required SignalRClient signalRClient,
   })  : _repository = repository,
-        _sessionManager = sessionManager;
+        _sessionManager = sessionManager,
+        _signalRClient = signalRClient;
 
   // ─── Actions ──────────────────────────────────────────────────────────────
 
@@ -55,6 +59,8 @@ class OnboardingController extends ChangeNotifier {
         username: (await _sessionManager.getUsername())!,
         familyId: family.id,
       );
+
+      await _signalRClient.connect();
 
       _familyId = family.id;
       return true;
@@ -86,6 +92,8 @@ class OnboardingController extends ChangeNotifier {
         username: (await _sessionManager.getUsername())!,
         familyId: family.id,
       );
+
+      await _signalRClient.connect();
 
       _familyId = family.id;
       return true;

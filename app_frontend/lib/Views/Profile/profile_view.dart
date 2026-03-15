@@ -1,3 +1,4 @@
+import 'package:app_frontend/API/signal_r_client.dart';
 import 'package:app_frontend/Auth/session_manager.dart';
 import 'package:app_frontend/Routes/routes.dart';
 import 'package:app_frontend/Views/Profile/profile_controller.dart';
@@ -14,6 +15,7 @@ class ProfileView extends StatelessWidget {
     return ChangeNotifierProvider(
       create: (ctx) => ProfileController(
         sessionManager: ctx.read<SessionManager>(),
+        signalRClient: ctx.read<SignalRClient>(),
       ),
       child: const _ProfileBody(),
     );
