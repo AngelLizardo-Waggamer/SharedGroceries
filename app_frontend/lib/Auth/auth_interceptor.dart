@@ -1,15 +1,16 @@
+import 'dart:async';
+
 import 'package:app_frontend/API/DTOs/auth_dtos.dart';
+import 'package:app_frontend/Auth/session_expiration_recovery.dart';
 import 'package:app_frontend/Auth/session_manager.dart';
+import 'package:app_frontend/Auth/token_refresh_coordinator.dart';
 import 'package:dio/dio.dart';
 
 /// Builds a [QueuedInterceptorsWrapper] that:
 ///  1. Injects the stored Bearer token into every outgoing request as-is.
-///  2. On a 401 response, calls the refresh endpoint via [dio]
-///     (marked with a `skipAuth` flag to avoid interceptor recursion),
-///     saves the new token pair, and retries the original request once.
-///  3. Propagates [SessionExpiredException] (as a [DioException]) when the
-///     refresh token is also invalid, clears the session so the user must
-///     log in again.
+///  2. On 401, requests a token refresh through [TokenRefreshCoordinator]
+///     and retries the original request once.
+///  3. If refresh fails definitively, triggers the global forced-logout flow.
 QueuedInterceptorsWrapper buildAuthInterceptor(
 	Dio dio,
 	String apiVersion,
@@ -32,57 +33,58 @@ QueuedInterceptorsWrapper buildAuthInterceptor(
 		},
 
 		onError: (error, handler) async {
+			final requestOptions = error.requestOptions;
+
+			// Never try to refresh again for skipped auth requests
+			// (login/register/refresh) or already retried requests.
+			if (requestOptions.extra['skipAuth'] == true ||
+					requestOptions.extra['retriedAfterRefresh'] == true) {
+				return handler.next(error);
+			}
+
 			// Only attempt a refresh once when we receive an Unauthorized response.
 			if (error.response?.statusCode != 401) {
 				return handler.next(error);
 			}
 
-			final refreshToken = await session.getRefreshToken();
-			if (refreshToken == null) {
-				await session.clearSession();
-				return handler.reject(DioException(
-					requestOptions: error.requestOptions,
-					error: const SessionExpiredException(
-						'No refresh token available. Please log in again.',
-					),
-					type: DioExceptionType.badResponse,
-				));
-			}
-
 			try {
-				// Use the same dio instance with skipAuth so the interceptor
-				// does not try to inject / refresh a token for this request.
-				final refreshResponse = await dio.post(
-					'auth/$apiVersion/refresh',
-					data: RefreshDTO(refreshToken: refreshToken).toJson(),
-					options: Options(extra: {'skipAuth': true}),
-				);
-
-				final body = refreshResponse.data as Map<String, dynamic>;
-				final newAuthToken = body['authToken'] as String;
-				final newRefreshToken = body['refreshToken'] as String;
-
-				await session.saveTokens(
-					authToken: newAuthToken,
-					refreshToken: newRefreshToken,
+				final newAuthToken = await TokenRefreshCoordinator.instance
+						.refreshAccessToken(
+					session: session,
+					requester: (refreshToken) {
+						return dio.post(
+							'auth/$apiVersion/refresh',
+							data: RefreshDTO(refreshToken: refreshToken).toJson(),
+							options: Options(extra: {'skipAuth': true}),
+						);
+					},
+					clearSessionOnFailure: true,
 				);
 
 				// Retry the original request with the fresh token.
-				final retryOptions = error.requestOptions
-					..headers['Authorization'] = 'Bearer $newAuthToken';
+				final retryOptions = requestOptions
+					..headers['Authorization'] = 'Bearer $newAuthToken'
+					..extra = {
+						...requestOptions.extra,
+						'retriedAfterRefresh': true,
+					};
 
 				final retryResponse = await dio.fetch(retryOptions);
 				return handler.resolve(retryResponse);
-			} on DioException catch (e) {
+			} on SessionExpiredException catch (e) {
 				// Refresh also failed – clear the session and propagate.
-				await session.clearSession();
-				const expired = SessionExpiredException(
-					'Session refresh failed. Please log in again.',
-				);
+				unawaited(SessionExpirationRecovery.instance.recover());
 				return handler.reject(DioException(
-					requestOptions: error.requestOptions,
-					error: expired,
-					message: expired.message,
+					requestOptions: requestOptions,
+					error: e,
+					message: e.message,
+					type: DioExceptionType.badResponse,
+				));
+			} on DioException catch (e) {
+				return handler.reject(DioException(
+					requestOptions: requestOptions,
+					error: e.error,
+					message: e.message,
 					type: e.type,
 				));
 			}
