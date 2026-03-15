@@ -17,6 +17,9 @@
 .vs/
 obj/
 
+# Tests de prueba de K6 que no son los finales
+TestsK6DePrueba/
+
 # User-specific files (MonoDevelop/Xamarin Studio)
 *.userprefs
 
