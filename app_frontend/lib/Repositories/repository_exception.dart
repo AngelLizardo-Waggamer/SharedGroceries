@@ -12,16 +12,16 @@ String dioErrorMessage(DioException e) {
     if (data is Map<String, dynamic> && data.containsKey('message')) {
       return ApiErrorResponseDTO.fromJson(data).message;
     }
-    return 'Server error ($statusCode). Please try again.';
+    return 'Error de servidor ($statusCode). Intenta de nuevo más tarde.';
   }
   // null statusCode means no network connection was established.
-  return e.message ?? 'Network error. Please try again.';
+  return 'Ocurrió un error inesperado. Verifica tu conexión e intenta de nuevo.';
 }
 
 /// Logs an unexpected (non-Dio) error and returns a generic message.
 String unexpectedErrorMessage(Object e, String context) {
   log('$context unexpected error: $e');
-  return 'An unexpected error occurred.';
+  return 'Ocurrió un error inesperado. Verifica tu conexión e intenta de nuevo.';
 }
 
 /// Base exception thrown by every repository.
