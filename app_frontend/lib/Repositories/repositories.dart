@@ -19,11 +19,11 @@ class Repositories {
   Repositories({
     required ApiClient apiClient,
     required SessionManager sessionManager,
-  })  : auth = AuthRepository(
-          apiClient: apiClient,
-          sessionManager: sessionManager,
-        ),
-        families = FamiliesRepository(apiClient: apiClient),
-        products = ProductsRepository(apiClient: apiClient),
-        shoppingLists = ShoppingListsRepository(apiClient: apiClient);
+  }) : auth = AuthRepository(
+         apiClient: apiClient,
+         sessionManager: sessionManager,
+       ),
+       families = FamiliesRepository(apiClient: apiClient),
+       products = ProductsRepository(apiClient: apiClient),
+       shoppingLists = ShoppingListsRepository(apiClient: apiClient);
 }

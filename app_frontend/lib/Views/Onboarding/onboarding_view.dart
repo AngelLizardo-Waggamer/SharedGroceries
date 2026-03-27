@@ -122,7 +122,8 @@ class _CreateFamilyModal extends StatelessWidget {
     return SingleChildScrollView(
       child: Padding(
         padding: EdgeInsets.only(
-          bottom: MediaQuery.of(context).viewInsets.bottom +
+          bottom:
+              MediaQuery.of(context).viewInsets.bottom +
               MediaQuery.of(context).size.height * 0.02,
           left: 20,
           right: 20,
@@ -147,8 +148,8 @@ class _CreateFamilyModal extends StatelessWidget {
               Text(
                 controller.errorMessage!,
                 style: Theme.of(context).textTheme.bodySmall?.copyWith(
-                      color: Theme.of(context).colorScheme.error,
-                    ),
+                  color: Theme.of(context).colorScheme.error,
+                ),
               ),
             ],
             const SizedBox(height: 20),
@@ -196,7 +197,8 @@ class _JoinFamilyModal extends StatelessWidget {
     return SingleChildScrollView(
       child: Padding(
         padding: EdgeInsets.only(
-          bottom: MediaQuery.of(context).viewInsets.bottom +
+          bottom:
+              MediaQuery.of(context).viewInsets.bottom +
               MediaQuery.of(context).size.height * 0.02,
           left: 20,
           right: 20,
@@ -222,14 +224,15 @@ class _JoinFamilyModal extends StatelessWidget {
               Text(
                 controller.errorMessage!,
                 style: Theme.of(context).textTheme.bodySmall?.copyWith(
-                      color: Theme.of(context).colorScheme.error,
-                    ),
+                  color: Theme.of(context).colorScheme.error,
+                ),
               ),
             ],
             const SizedBox(height: 20),
             ElevatedButton(
-              onPressed:
-                  controller.isJoining ? null : () => _onJoinFamily(context),
+              onPressed: controller.isJoining
+                  ? null
+                  : () => _onJoinFamily(context),
               child: controller.isJoining
                   ? const SizedBox(
                       width: 18,

@@ -30,9 +30,9 @@ class FamilyController extends ChangeNotifier {
     required FamiliesRepository repository,
     required SessionManager sessionManager,
     required SignalRClient signalRClient,
-  })  : _repository = repository,
-        _sessionManager = sessionManager,
-        _signalRClient = signalRClient {
+  }) : _repository = repository,
+       _sessionManager = sessionManager,
+       _signalRClient = signalRClient {
     _loadFamilyData();
   }
 

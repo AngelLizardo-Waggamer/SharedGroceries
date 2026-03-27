@@ -190,10 +190,7 @@ class _HomeBodyState extends State<_HomeBody> {
                 } else {
                   Navigator.of(context).pushNamed(
                     Routes.shoppingList,
-                    arguments: {
-                      'listId': list.id,
-                      'listName': list.name,
-                    },
+                    arguments: {'listId': list.id, 'listName': list.name},
                   );
                 }
               },

@@ -23,7 +23,8 @@ class HomeController extends ChangeNotifier {
   String? _errorMessage;
   List<ShoppingListResponseDTO> _shoppingLists = [];
   bool _hasCheckedFamily = false;
-  bool _needsOnboarding = false; // If true, user should be redirected to onboarding
+  bool _needsOnboarding =
+      false; // If true, user should be redirected to onboarding
   final Set<String> _selectedListIds = {}; // IDs of selected shopping lists
 
   bool get isLoading => _isLoading;
@@ -41,9 +42,9 @@ class HomeController extends ChangeNotifier {
     required ShoppingListsRepository repository,
     required SessionManager sessionManager,
     required SignalRClient signalRClient,
-  })  : _repository = repository,
-        _sessionManager = sessionManager,
-        _signalRClient = signalRClient;
+  }) : _repository = repository,
+       _sessionManager = sessionManager,
+       _signalRClient = signalRClient;
 
   // ─── Actions ──────────────────────────────────────────────────────────────
 
@@ -88,9 +89,7 @@ class HomeController extends ChangeNotifier {
     notifyListeners();
 
     try {
-      final newList = await _repository.create(
-        listNameController.text.trim(),
-      );
+      final newList = await _repository.create(listNameController.text.trim());
       // Add the new list to the beginning of the list
       _shoppingLists.insert(0, newList);
       listNameController.clear();
@@ -141,10 +140,10 @@ class HomeController extends ChangeNotifier {
 
       // Remove deleted lists from the local list
       _shoppingLists.removeWhere((list) => _selectedListIds.contains(list.id));
-      
+
       // Clear selection
       _selectedListIds.clear();
-      
+
       return true;
     } on RepositoryException catch (e) {
       _errorMessage = e.message;

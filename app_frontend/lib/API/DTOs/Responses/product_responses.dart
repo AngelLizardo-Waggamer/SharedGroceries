@@ -38,9 +38,7 @@ class ProductSuggestionsResponseDTO {
   ProductSuggestionsResponseDTO({required this.suggestions});
 
   factory ProductSuggestionsResponseDTO.fromJson(List<dynamic> json) {
-    return ProductSuggestionsResponseDTO(
-      suggestions: List<String>.from(json),
-    );
+    return ProductSuggestionsResponseDTO(suggestions: List<String>.from(json));
   }
 }
 

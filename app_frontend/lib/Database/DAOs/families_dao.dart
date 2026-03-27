@@ -5,6 +5,7 @@ import 'package:app_frontend/Database/tables.dart';
 part 'families_dao.g.dart';
 
 @DriftAccessor(tables: [LocalFamilies])
-class FamiliesDao extends DatabaseAccessor<AppDatabase> with _$FamiliesDaoMixin {
-	FamiliesDao(super.db);
+class FamiliesDao extends DatabaseAccessor<AppDatabase>
+    with _$FamiliesDaoMixin {
+  FamiliesDao(super.db);
 }

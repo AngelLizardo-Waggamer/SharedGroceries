@@ -9,7 +9,7 @@ class ShoppingListsRepository {
   final ApiClient _apiClient;
 
   ShoppingListsRepository({required ApiClient apiClient})
-      : _apiClient = apiClient;
+    : _apiClient = apiClient;
 
   // ─── Actions ──────────────────────────────────────────────────────────────
 
@@ -37,7 +37,9 @@ class ShoppingListsRepository {
     try {
       final response = await _apiClient.listsRequest(
         ListsRoutes.list,
-        CreateShoppingListDTO(name: ''), // Dummy DTO since endpoint doesn't need data
+        CreateShoppingListDTO(
+          name: '',
+        ), // Dummy DTO since endpoint doesn't need data
       );
       return ShoppingListResponseDTO.listFromJson(
         response.data as List<dynamic>,
@@ -56,7 +58,9 @@ class ShoppingListsRepository {
     try {
       final response = await _apiClient.listsRequest(
         ListsRoutes.listAll,
-        CreateShoppingListDTO(name: ''), // Dummy DTO since endpoint doesn't need data
+        CreateShoppingListDTO(
+          name: '',
+        ), // Dummy DTO since endpoint doesn't need data
       );
       return ShoppingListResponseDTO.listFromJson(
         response.data as List<dynamic>,

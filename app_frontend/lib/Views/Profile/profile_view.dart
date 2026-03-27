@@ -51,27 +51,27 @@ class _ProfileBody extends StatelessWidget {
                     color: Colors.grey,
                   ),
                   const SizedBox(height: 32),
-                  
+
                   // Username display
                   if (controller.username != null)
                     Text(
                       controller.username!,
                       style: Theme.of(context).textTheme.headlineMedium,
                     ),
-                  
+
                   // Error message
                   if (controller.errorMessage != null) ...[
                     const SizedBox(height: 16),
                     Text(
                       controller.errorMessage!,
                       style: Theme.of(context).textTheme.bodyMedium?.copyWith(
-                            color: Theme.of(context).colorScheme.error,
-                          ),
+                        color: Theme.of(context).colorScheme.error,
+                      ),
                     ),
                   ],
-                  
+
                   const SizedBox(height: 48),
-                  
+
                   // Logout button
                   SizedBox(
                     width: double.infinity,
@@ -96,9 +96,8 @@ class _ProfileBody extends StatelessWidget {
     if (!success || !context.mounted) return;
 
     // Navigate to login and remove all previous routes from the stack
-    Navigator.of(context).pushNamedAndRemoveUntil(
-      Routes.login,
-      (route) => false,
-    );
+    Navigator.of(
+      context,
+    ).pushNamedAndRemoveUntil(Routes.login, (route) => false);
   }
 }

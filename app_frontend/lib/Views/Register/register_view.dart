@@ -14,9 +14,8 @@ class RegisterView extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     return ChangeNotifierProvider(
-      create: (ctx) => RegisterController(
-        repository: ctx.read<Repositories>().auth,
-      ),
+      create: (ctx) =>
+          RegisterController(repository: ctx.read<Repositories>().auth),
       child: const _RegisterBody(),
     );
   }
@@ -103,7 +102,10 @@ class _RegisterCard extends StatelessWidget {
               obscureText: true,
             ),
             const SizedBox(height: 40),
-            Text('Confirmar contraseña', style: Theme.of(context).textTheme.titleLarge),
+            Text(
+              'Confirmar contraseña',
+              style: Theme.of(context).textTheme.titleLarge,
+            ),
             const SizedBox(height: 15),
             TextField(
               controller: controller.passwordConfirmController,
@@ -122,7 +124,9 @@ class _RegisterCard extends StatelessWidget {
             const SizedBox(height: 40),
             // onPressed: null disables the button (Flutter built-in behaviour).
             FilledButton(
-              onPressed: controller.isLoading ? null : () => _onRegister(context),
+              onPressed: controller.isLoading
+                  ? null
+                  : () => _onRegister(context),
               child: controller.isLoading
                   ? const SizedBox(
                       width: 18,

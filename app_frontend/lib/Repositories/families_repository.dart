@@ -19,9 +19,7 @@ class FamiliesRepository {
         FamiliesRoutes.get,
         GetFamilyDTO(),
       );
-      return FamilyResponseDTO.fromJson(
-        response.data as Map<String, dynamic>,
-      );
+      return FamilyResponseDTO.fromJson(response.data as Map<String, dynamic>);
     } on DioException catch (e) {
       throw RepositoryException(dioErrorMessage(e));
     } catch (e) {
@@ -38,9 +36,7 @@ class FamiliesRepository {
         FamiliesRoutes.create,
         CreateFamilyDTO(familyName: familyName),
       );
-      return FamilyResponseDTO.fromJson(
-        response.data as Map<String, dynamic>,
-      );
+      return FamilyResponseDTO.fromJson(response.data as Map<String, dynamic>);
     } on DioException catch (e) {
       throw RepositoryException(dioErrorMessage(e));
     } catch (e) {
@@ -57,9 +53,7 @@ class FamiliesRepository {
         FamiliesRoutes.join,
         JoinFamilyDTO(inviteCode: inviteCode),
       );
-      return FamilyResponseDTO.fromJson(
-        response.data as Map<String, dynamic>,
-      );
+      return FamilyResponseDTO.fromJson(response.data as Map<String, dynamic>);
     } on DioException catch (e) {
       throw RepositoryException(dioErrorMessage(e));
     } catch (e) {
@@ -72,10 +66,7 @@ class FamiliesRepository {
   /// Removes the current user from their family. Throws [RepositoryException] on failure.
   Future<void> leave() async {
     try {
-      await _apiClient.familiesRequest(
-        FamiliesRoutes.leave,
-        LeaveFamilyDTO(),
-      );
+      await _apiClient.familiesRequest(FamiliesRoutes.leave, LeaveFamilyDTO());
     } on DioException catch (e) {
       throw RepositoryException(dioErrorMessage(e));
     } catch (e) {

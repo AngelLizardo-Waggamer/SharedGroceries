@@ -1,45 +1,37 @@
 import 'dto.dart';
 
 class CreateFamilyDTO extends DTO {
-	final String familyName;
+  final String familyName;
 
-	CreateFamilyDTO({
-		required this.familyName
-	});
+  CreateFamilyDTO({required this.familyName});
 
-	@override
-	Map<String, dynamic> toJson() {
-		return {
-			'familyName': familyName
-		};
-	}
+  @override
+  Map<String, dynamic> toJson() {
+    return {'familyName': familyName};
+  }
 }
 
 class JoinFamilyDTO extends DTO {
-	final String inviteCode;
+  final String inviteCode;
 
-	JoinFamilyDTO({
-		required this.inviteCode
-	});
+  JoinFamilyDTO({required this.inviteCode});
 
-	@override
-	Map<String, dynamic> toJson() {
-		return {
-			'inviteCode': inviteCode
-		};
-	}
+  @override
+  Map<String, dynamic> toJson() {
+    return {'inviteCode': inviteCode};
+  }
 }
 
 class GetFamilyDTO extends DTO {
-	@override
-	Map<String, dynamic> toJson() {
-		return {};
-	}
+  @override
+  Map<String, dynamic> toJson() {
+    return {};
+  }
 }
 
 class LeaveFamilyDTO extends DTO {
-	@override
-	Map<String, dynamic> toJson() {
-		return {};
-	}
+  @override
+  Map<String, dynamic> toJson() {
+    return {};
+  }
 }

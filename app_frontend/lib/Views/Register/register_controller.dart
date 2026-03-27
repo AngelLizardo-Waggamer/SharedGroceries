@@ -12,7 +12,8 @@ class RegisterController extends ChangeNotifier {
   // Bound directly to the TextFields so the view never reads .text itself.
   final TextEditingController usernameController = TextEditingController();
   final TextEditingController passwordController = TextEditingController();
-  final TextEditingController passwordConfirmController = TextEditingController();
+  final TextEditingController passwordConfirmController =
+      TextEditingController();
 
   // ─── UI state ─────────────────────────────────────────────────────────────
 
@@ -25,7 +26,7 @@ class RegisterController extends ChangeNotifier {
   // ─── Constructor ──────────────────────────────────────────────────────────
 
   RegisterController({required AuthRepository repository})
-      : _repository = repository;
+    : _repository = repository;
 
   // ─── Actions ──────────────────────────────────────────────────────────────
 

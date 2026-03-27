@@ -5,6 +5,7 @@ import 'package:app_frontend/Database/tables.dart';
 part 'shopping_lists_dao.g.dart';
 
 @DriftAccessor(tables: [LocalShoppingLists])
-class ShoppingListsDao extends DatabaseAccessor<AppDatabase> with _$ShoppingListsDaoMixin {
-	ShoppingListsDao(super.db);
+class ShoppingListsDao extends DatabaseAccessor<AppDatabase>
+    with _$ShoppingListsDaoMixin {
+  ShoppingListsDao(super.db);
 }

@@ -2,7 +2,7 @@ import 'package:app_frontend/Views/views.dart';
 import 'package:flutter/material.dart';
 
 class Routes {
-	Routes._();
+  Routes._();
 
   static String get home => '/home';
   static String get login => '/login';
@@ -12,21 +12,23 @@ class Routes {
   static String get family => '/family';
   static String get shoppingList => '/shopping-list';
 
-	static Map<String, WidgetBuilder> get routes => {
-		home: (context) => const HomeView(),
-		login: (context) => const LoginView(),
-		register: (context) => const RegisterView(),
-		onboarding: (context) => const OnboardingView(),
-		profile: (context) => const ProfileView(),
-		family: (context) => const FamilyView(),
+  static Map<String, WidgetBuilder> get routes => {
+    home: (context) => const HomeView(),
+    login: (context) => const LoginView(),
+    register: (context) => const RegisterView(),
+    onboarding: (context) => const OnboardingView(),
+    profile: (context) => const ProfileView(),
+    family: (context) => const FamilyView(),
     shoppingList: (context) {
-			final args = ModalRoute.of(context)?.settings.arguments;
-			final routeArgs = args is Map<String, String> ? args : const <String, String>{};
+      final args = ModalRoute.of(context)?.settings.arguments;
+      final routeArgs = args is Map<String, String>
+          ? args
+          : const <String, String>{};
 
-			return ShoppingListView(
-				listId: routeArgs['listId'] ?? '',
-				listName: routeArgs['listName'] ?? 'Lista',
-			);
-		},
-	};
+      return ShoppingListView(
+        listId: routeArgs['listId'] ?? '',
+        listName: routeArgs['listName'] ?? 'Lista',
+      );
+    },
+  };
 }

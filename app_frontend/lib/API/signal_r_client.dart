@@ -83,8 +83,8 @@ class SignalRClient extends ChangeNotifier {
   SignalRClient({
     required SessionManager sessionManager,
     required ApiClient apiClient,
-  })  : _sessionManager = sessionManager,
-        _apiClient = apiClient;
+  }) : _sessionManager = sessionManager,
+       _apiClient = apiClient;
 
   SignalRConnectionStatus get status => _status;
   bool get isConnected => _status == SignalRConnectionStatus.connected;
@@ -265,8 +265,9 @@ class SignalRClient extends ChangeNotifier {
       if (parts.length != 3) return false;
 
       final normalized = base64Url.normalize(parts[1]);
-      final payload = json.decode(utf8.decode(base64Url.decode(normalized)))
-          as Map<String, dynamic>;
+      final payload =
+          json.decode(utf8.decode(base64Url.decode(normalized)))
+              as Map<String, dynamic>;
       final exp = payload['exp'];
       if (exp is! num) return false;
 
@@ -311,12 +312,13 @@ class SignalRClient extends ChangeNotifier {
     final apiUri = Uri.parse(apiUrl);
     final segments = apiUri.pathSegments.where((e) => e.isNotEmpty).toList();
 
-    if (segments.isNotEmpty &&
-        segments.last.toLowerCase() == 'api') {
+    if (segments.isNotEmpty && segments.last.toLowerCase() == 'api') {
       segments.removeLast();
     }
 
-    final hubUri = apiUri.replace(pathSegments: [...segments, 'hubs', 'shopping']);
+    final hubUri = apiUri.replace(
+      pathSegments: [...segments, 'hubs', 'shopping'],
+    );
     return hubUri.toString();
   }
 
