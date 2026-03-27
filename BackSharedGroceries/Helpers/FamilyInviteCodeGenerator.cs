@@ -28,7 +28,7 @@ namespace BackSharedGroceries.Helpers
         {
             _familyRepository = familyRepository;
         }
-        
+
         /// <summary>
         /// Generates a unique 6-character alphanumeric invite code for a family.
         /// The code consists of uppercase letters (A-Z) and digits (0-9).
@@ -48,7 +48,7 @@ namespace BackSharedGroceries.Helpers
                 // Generate a random 6-character code by selecting random characters from the character set.
                 code = new string(Enumerable.Repeat(chars, 6)
                     .Select(s => s[_random.Next(s.Length)]).ToArray());
-                
+
                 // Check if the generated code already exists in the database.
                 exists = await _familyRepository.ExistsByInviteCodeAsync(code);
             } while (exists); // Continue generating if the code already exists.

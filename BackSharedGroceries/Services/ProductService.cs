@@ -87,7 +87,7 @@ namespace BackSharedGroceries.Services
 
             // Upsert the product
             var success = await _productRepository.UpsertProductAsync(product);
-            
+
             if (!success)
             {
                 // This shouldn't happen for a create operation, but handle it
@@ -168,7 +168,7 @@ namespace BackSharedGroceries.Services
 
             // Upsert with timestamp check
             var success = await _productRepository.UpsertProductAsync(product);
-            
+
             if (!success)
             {
                 // Update was ignored because the database has a newer client timestamp
@@ -231,7 +231,7 @@ namespace BackSharedGroceries.Services
 
             // Delete the product
             var success = await _productRepository.DeleteProductAsync(id);
-            
+
             if (!success)
             {
                 _logger.LogWarning("Failed to delete product {ProductId}", id);
@@ -285,7 +285,7 @@ namespace BackSharedGroceries.Services
                 // Validate that the product's list belongs to the family
                 if (!familyListIds.Contains(dto.ListId))
                 {
-                    _logger.LogWarning("Skipping product {ProductId} - list {ListId} does not belong to family {FamilyId}", 
+                    _logger.LogWarning("Skipping product {ProductId} - list {ListId} does not belong to family {FamilyId}",
                         dto.Id, dto.ListId, familyId);
                     syncResult.Ignored.Add(dto.Id);
                     continue;
@@ -305,7 +305,7 @@ namespace BackSharedGroceries.Services
 
                 // Attempt upsert with timestamp check
                 var success = await _productRepository.UpsertProductAsync(product);
-                
+
                 if (success)
                 {
                     syncResult.Synced.Add(dto.Id);
@@ -321,7 +321,7 @@ namespace BackSharedGroceries.Services
                 }
             }
 
-            _logger.LogInformation("Batch sync completed: {Synced} synced, {Ignored} ignored", 
+            _logger.LogInformation("Batch sync completed: {Synced} synced, {Ignored} ignored",
                 syncResult.Synced.Count, syncResult.Ignored.Count);
 
             return ServiceResult<SyncResultDto>.Ok(syncResult);
@@ -354,7 +354,7 @@ namespace BackSharedGroceries.Services
 
             // Get product suggestions from repository
             var suggestions = await _productRepository.GetProductSuggestionsAsync(familyId.Value);
-            
+
             return ServiceResult<IEnumerable<string>>.Ok(suggestions);
         }
 

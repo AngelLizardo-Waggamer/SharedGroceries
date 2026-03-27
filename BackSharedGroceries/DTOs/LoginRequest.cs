@@ -5,7 +5,8 @@ namespace BackSharedGroceries.DTOs
     /// <summary>
     /// DTO for user login request.
     /// </summary>
-    public class LoginRequest{
+    public class LoginRequest
+    {
 
         /// <summary>
         /// Username of the user trying to log in.

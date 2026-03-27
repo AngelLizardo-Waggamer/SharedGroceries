@@ -37,9 +37,9 @@ namespace BackSharedGroceries.Filters
                 // Add 401 response if not already present
                 if (operation.Responses != null && !operation.Responses.ContainsKey("401"))
                 {
-                    operation.Responses.Add("401", new OpenApiResponse 
-                    { 
-                        Description = "Unauthorized - Valid JWT token required" 
+                    operation.Responses.Add("401", new OpenApiResponse
+                    {
+                        Description = "Unauthorized - Valid JWT token required"
                     });
                 }
             }

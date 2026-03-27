@@ -44,7 +44,7 @@ namespace Data
             catch (DbUpdateException ex)
             {
                 throw new InvalidOperationException(
-                "Failed to apply database migrations. The database may be in an inconsistent state.", 
+                "Failed to apply database migrations. The database may be in an inconsistent state.",
                 ex);
             }
             catch (Exception ex)

@@ -25,11 +25,11 @@ namespace BackSharedGroceries.Models
         public Guid? LastModifiedByUserId { get; set; }
         [ForeignKey(nameof(LastModifiedByUserId))]
         public User? LastModifiedByUser { get; set; }
-        
+
         [Required]
         [Column("client_timestamp")]
         public DateTime ClientTimestamp { get; set; } = DateTime.UtcNow;
-        
+
         [Column("updated_at")]
         public DateTime UpdatedAt { get; set; } = DateTime.UtcNow;
 

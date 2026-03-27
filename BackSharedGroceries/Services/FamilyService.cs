@@ -54,15 +54,15 @@ namespace BackSharedGroceries.Services
             {
                 return ServiceResult<FamilyResponse>.BadRequest("User already belongs to a family.");
             }
-            
+
             // Generate a unique invite code for the family
             string inviteCode = await _inviteCodeGenerator.GenerateInviteCode();
 
             // Create the family entity
             Family newFamily = new()
             {
-              FamilyName = request.FamilyName,
-              FamilyInviteCode = inviteCode
+                FamilyName = request.FamilyName,
+                FamilyInviteCode = inviteCode
             };
 
             // Save the family to the database
@@ -76,7 +76,7 @@ namespace BackSharedGroceries.Services
             {
                 Id = newFamily.FamilyId,
                 Name = newFamily.FamilyName,
-                InviteCode = newFamily.FamilyInviteCode  
+                InviteCode = newFamily.FamilyInviteCode
             });
         }
 
@@ -115,7 +115,8 @@ namespace BackSharedGroceries.Services
             Family? family = await _familyRepository.GetByInviteCodeAsync(normalizedCode);
 
             // If there is no family with the provided invite code, return not found
-            if (family == null) {
+            if (family == null)
+            {
                 return ServiceResult<FamilyResponse>.NotFound("Family with the provided invite code does not exist.");
             }
 
@@ -125,7 +126,7 @@ namespace BackSharedGroceries.Services
             {
                 Id = family.FamilyId,
                 Name = family.FamilyName,
-                InviteCode = family.FamilyInviteCode  
+                InviteCode = family.FamilyInviteCode
             });
         }
 

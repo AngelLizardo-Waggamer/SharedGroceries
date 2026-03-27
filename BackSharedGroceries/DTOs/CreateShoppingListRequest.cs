@@ -4,7 +4,7 @@ namespace BackSharedGroceries.DTOs
     /// DTO for creating a new shopping list request.
     /// </summary>
     public class CreateShoppingListRequest
-    {   
+    {
         /// <summary>
         /// Name of the shopping list to be created.
         /// </summary>
