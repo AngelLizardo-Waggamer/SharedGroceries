@@ -28,7 +28,7 @@ class LoginController extends ChangeNotifier {
   // ─── Constructor ──────────────────────────────────────────────────────────
 
   LoginController({required AuthRepository repository})
-      : _repository = repository;
+    : _repository = repository;
 
   // ─── Actions ──────────────────────────────────────────────────────────────
 

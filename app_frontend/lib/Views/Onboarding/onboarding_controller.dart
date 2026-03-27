@@ -34,9 +34,9 @@ class OnboardingController extends ChangeNotifier {
     required FamiliesRepository repository,
     required SessionManager sessionManager,
     required SignalRClient signalRClient,
-  })  : _repository = repository,
-        _sessionManager = sessionManager,
-        _signalRClient = signalRClient;
+  }) : _repository = repository,
+       _sessionManager = sessionManager,
+       _signalRClient = signalRClient;
 
   // ─── Actions ──────────────────────────────────────────────────────────────
 
@@ -50,9 +50,7 @@ class OnboardingController extends ChangeNotifier {
     notifyListeners();
 
     try {
-      final family = await _repository.create(
-        familyNameController.text.trim(),
-      );
+      final family = await _repository.create(familyNameController.text.trim());
 
       // Persist the family ID in session storage
       await _sessionManager.saveUserData(
@@ -83,9 +81,7 @@ class OnboardingController extends ChangeNotifier {
     notifyListeners();
 
     try {
-      final family = await _repository.join(
-        inviteCodeController.text.trim(),
-      );
+      final family = await _repository.join(inviteCodeController.text.trim());
 
       // Persist the family ID in session storage
       await _sessionManager.saveUserData(

@@ -14,7 +14,7 @@ namespace BackSharedGroceries.Models
         [Required]
         [Column("fcm_token")]
         public string FcmToken { get; set; } = string.Empty;
-        
+
         [Column("updated_at")]
         public DateTime UpdatedAt { get; set; } = DateTime.UtcNow;
     }

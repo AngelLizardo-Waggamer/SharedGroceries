@@ -13,8 +13,8 @@ class AuthRepository {
   AuthRepository({
     required ApiClient apiClient,
     required SessionManager sessionManager,
-  })  : _apiClient = apiClient,
-        _sessionManager = sessionManager;
+  }) : _apiClient = apiClient,
+       _sessionManager = sessionManager;
 
   // ─── Actions ──────────────────────────────────────────────────────────────
 
@@ -46,7 +46,9 @@ class AuthRepository {
     } on DioException catch (e) {
       // 401 has its own message since it means wrong credentials, not a server fault.
       if (e.response?.statusCode == 401) {
-        throw const RepositoryException('Las credenciales son incorrectas. Inténtalo de nuevo.');
+        throw const RepositoryException(
+          'Las credenciales son incorrectas. Inténtalo de nuevo.',
+        );
       }
       throw RepositoryException(dioErrorMessage(e));
     } catch (e) {

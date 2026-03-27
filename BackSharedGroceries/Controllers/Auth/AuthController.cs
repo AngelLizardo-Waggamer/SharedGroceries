@@ -120,7 +120,7 @@ namespace BackSharedGroceries.Controllers.Auth
 
             // Delegate token refresh logic to the service layer
             var result = await _authService.RefreshTokenAsync(request);
-            
+
             // Map ServiceResult to appropriate HTTP status code
             // Returns new JWT token on success, or error if refresh token is invalid/expired
             return result.ResultType switch

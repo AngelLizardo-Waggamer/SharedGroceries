@@ -12,6 +12,6 @@ namespace BackSharedGroceries.DTOs
         /// </summary>
         /// <example>token...</example>
         [Required]
-        public required string RefreshToken {get; init;}
+        public required string RefreshToken { get; init; }
     }
 }

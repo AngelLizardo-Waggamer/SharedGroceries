@@ -5,6 +5,7 @@ import 'package:app_frontend/Database/tables.dart';
 part 'suggestions_dao.g.dart';
 
 @DriftAccessor(tables: [LocalSuggestions])
-class SuggestionsDao extends DatabaseAccessor<AppDatabase> with _$SuggestionsDaoMixin {
-	SuggestionsDao(super.db);
+class SuggestionsDao extends DatabaseAccessor<AppDatabase>
+    with _$SuggestionsDaoMixin {
+  SuggestionsDao(super.db);
 }

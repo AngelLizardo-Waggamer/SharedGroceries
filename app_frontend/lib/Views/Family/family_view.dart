@@ -35,14 +35,12 @@ class _FamilyBody extends StatelessWidget {
     final controller = context.watch<FamilyController>();
 
     return Scaffold(
-      appBar: AppBar(
-        title: const Text('Familia'),
-      ),
+      appBar: AppBar(title: const Text('Familia')),
       body: controller.isLoading
           ? const Center(child: CircularProgressIndicator())
           : controller.errorMessage != null
-              ? _buildError(context, controller)
-              : _buildContent(context, controller),
+          ? _buildError(context, controller)
+          : _buildContent(context, controller),
     );
   }
 
@@ -53,17 +51,13 @@ class _FamilyBody extends StatelessWidget {
         child: Column(
           mainAxisAlignment: MainAxisAlignment.center,
           children: [
-            const Icon(
-              Icons.error_outline,
-              size: 64,
-              color: Colors.grey,
-            ),
+            const Icon(Icons.error_outline, size: 64, color: Colors.grey),
             const SizedBox(height: 16),
             Text(
               controller.errorMessage!,
               style: Theme.of(context).textTheme.bodyLarge?.copyWith(
-                    color: Theme.of(context).colorScheme.error,
-                  ),
+                color: Theme.of(context).colorScheme.error,
+              ),
               textAlign: TextAlign.center,
             ),
           ],
@@ -76,9 +70,7 @@ class _FamilyBody extends StatelessWidget {
     final familyData = controller.familyData;
 
     if (familyData == null) {
-      return const Center(
-        child: Text('No se encontraron datos de la familia'),
-      );
+      return const Center(child: Text('No se encontraron datos de la familia'));
     }
 
     return SingleChildScrollView(
@@ -88,13 +80,9 @@ class _FamilyBody extends StatelessWidget {
           crossAxisAlignment: CrossAxisAlignment.stretch,
           children: [
             const SizedBox(height: 20),
-            
+
             // Family icon
-            const Icon(
-              Icons.family_restroom,
-              size: 100,
-              color: Colors.grey,
-            ),
+            const Icon(Icons.family_restroom, size: 100, color: Colors.grey),
             const SizedBox(height: 32),
 
             // Family name section
@@ -107,8 +95,8 @@ class _FamilyBody extends StatelessWidget {
                     Text(
                       'Nombre de la familia',
                       style: Theme.of(context).textTheme.labelLarge?.copyWith(
-                            color: Theme.of(context).colorScheme.primary,
-                          ),
+                        color: Theme.of(context).colorScheme.primary,
+                      ),
                     ),
                     const SizedBox(height: 8),
                     Text(
@@ -131,8 +119,8 @@ class _FamilyBody extends StatelessWidget {
                     Text(
                       'Código de invitación',
                       style: Theme.of(context).textTheme.labelLarge?.copyWith(
-                            color: Theme.of(context).colorScheme.primary,
-                          ),
+                        color: Theme.of(context).colorScheme.primary,
+                      ),
                     ),
                     const SizedBox(height: 8),
                     Row(
@@ -141,14 +129,14 @@ class _FamilyBody extends StatelessWidget {
                         Expanded(
                           child: Text(
                             familyData.inviteCode,
-                            style: Theme.of(context).textTheme.headlineSmall?.copyWith(
-                                  fontFamily: 'monospace',
-                                ),
+                            style: Theme.of(context).textTheme.headlineSmall
+                                ?.copyWith(fontFamily: 'monospace'),
                           ),
                         ),
                         IconButton(
                           icon: const Icon(Icons.copy),
-                          onPressed: () => _copyInviteCode(context, familyData.inviteCode),
+                          onPressed: () =>
+                              _copyInviteCode(context, familyData.inviteCode),
                           tooltip: 'Copiar código',
                         ),
                       ],
@@ -183,8 +171,8 @@ class _FamilyBody extends StatelessWidget {
               Text(
                 controller.errorMessage!,
                 style: Theme.of(context).textTheme.bodyMedium?.copyWith(
-                      color: Theme.of(context).colorScheme.error,
-                    ),
+                  color: Theme.of(context).colorScheme.error,
+                ),
                 textAlign: TextAlign.center,
               ),
             ],
@@ -220,7 +208,7 @@ class _FamilyBody extends StatelessWidget {
             ),
             child: const Text('Cancelar'),
           ),
-          SizedBox(height: 10,),
+          SizedBox(height: 10),
           FilledButton(
             onPressed: () {
               Navigator.of(dialogContext).pop();
@@ -243,9 +231,8 @@ class _FamilyBody extends StatelessWidget {
     if (!success || !context.mounted) return;
 
     // Navigate to onboarding and remove all previous routes
-    Navigator.of(context).pushNamedAndRemoveUntil(
-      Routes.onboarding,
-      (route) => false,
-    );
+    Navigator.of(
+      context,
+    ).pushNamedAndRemoveUntil(Routes.onboarding, (route) => false);
   }
 }

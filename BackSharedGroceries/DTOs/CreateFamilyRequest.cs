@@ -4,7 +4,7 @@ namespace BackSharedGroceries.DTOs
     /// DTO for creating a new family request.
     /// </summary>
     public class CreateFamilyRequest
-    {   
+    {
         /// <summary>
         /// Name of the family to be created.
         /// </summary>

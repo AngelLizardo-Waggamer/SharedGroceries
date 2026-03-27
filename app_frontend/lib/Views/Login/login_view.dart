@@ -14,9 +14,8 @@ class LoginView extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     return ChangeNotifierProvider(
-      create: (ctx) => LoginController(
-        repository: ctx.read<Repositories>().auth,
-      ),
+      create: (ctx) =>
+          LoginController(repository: ctx.read<Repositories>().auth),
       child: const _LoginBody(),
     );
   }
@@ -149,7 +148,9 @@ class _LoginCard extends StatelessWidget {
 
     // If the user has no family yet, send them to onboarding first.
     // pushReplacementNamed prevents going back to login via the back button.
-    final destination = controller.familyId != null ? Routes.home : Routes.onboarding;
+    final destination = controller.familyId != null
+        ? Routes.home
+        : Routes.onboarding;
     Navigator.of(context).pushReplacementNamed(destination);
   }
 }

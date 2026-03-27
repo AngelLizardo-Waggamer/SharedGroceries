@@ -1,3 +1,3 @@
 abstract class DTO {
-	Map<String, dynamic> toJson();
+  Map<String, dynamic> toJson();
 }

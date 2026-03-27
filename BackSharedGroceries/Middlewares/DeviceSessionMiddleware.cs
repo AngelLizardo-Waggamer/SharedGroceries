@@ -33,7 +33,7 @@ namespace BackSharedGroceries.Middlewares
                     // Check the actual device Id registered on the BD
                     var user = await dbContext.Users
                         .AsNoTracking()
-                        .Select(u => new { u.Id, u.CurrentDeviceId})
+                        .Select(u => new { u.Id, u.CurrentDeviceId })
                         .FirstOrDefaultAsync(u => u.Id == userIdParsed);
 
                     // If the user cannot be found or the device Ids do not match, reject the request

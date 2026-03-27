@@ -48,9 +48,7 @@ class ProductsRepository {
         ProductsRoutes.create,
         dto,
       );
-      return ProductResponseDTO.fromJson(
-        response.data as Map<String, dynamic>,
-      );
+      return ProductResponseDTO.fromJson(response.data as Map<String, dynamic>);
     } on DioException catch (e) {
       throw RepositoryException(dioErrorMessage(e));
     } catch (e) {
@@ -67,9 +65,7 @@ class ProductsRepository {
         ProductsRoutes.update,
         dto,
       );
-      return ProductResponseDTO.fromJson(
-        response.data as Map<String, dynamic>,
-      );
+      return ProductResponseDTO.fromJson(response.data as Map<String, dynamic>);
     } on DioException catch (e) {
       throw RepositoryException(dioErrorMessage(e));
     } catch (e) {

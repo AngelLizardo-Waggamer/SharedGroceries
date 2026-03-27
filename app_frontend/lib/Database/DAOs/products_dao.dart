@@ -5,7 +5,7 @@ import 'package:app_frontend/Database/tables.dart';
 part 'products_dao.g.dart';
 
 @DriftAccessor(tables: [LocalProducts])
-class ProductsDao extends DatabaseAccessor<AppDatabase> with _$ProductsDaoMixin {
-	ProductsDao(super.db);
-	
+class ProductsDao extends DatabaseAccessor<AppDatabase>
+    with _$ProductsDaoMixin {
+  ProductsDao(super.db);
 }

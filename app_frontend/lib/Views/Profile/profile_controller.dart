@@ -23,8 +23,8 @@ class ProfileController extends ChangeNotifier {
   ProfileController({
     required SessionManager sessionManager,
     required SignalRClient signalRClient,
-  })  : _sessionManager = sessionManager,
-        _signalRClient = signalRClient {
+  }) : _sessionManager = sessionManager,
+       _signalRClient = signalRClient {
     _loadUserData();
   }
 

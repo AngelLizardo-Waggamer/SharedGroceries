@@ -3,9 +3,8 @@ import 'dart:async';
 import 'package:app_frontend/Auth/session_manager.dart';
 import 'package:dio/dio.dart';
 
-typedef TokenRefreshRequester = Future<Response<dynamic>> Function(
-  String refreshToken,
-);
+typedef TokenRefreshRequester =
+    Future<Response<dynamic>> Function(String refreshToken);
 
 /// Single gate for token refresh operations.
 ///

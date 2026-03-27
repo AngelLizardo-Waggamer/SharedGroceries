@@ -26,7 +26,7 @@ namespace BackSharedGroceries.Models
 
         [Column("current_device_id")]
         public Guid? CurrentDeviceId { get; set; }
-        
+
         [Column("created_at")]
         public DateTime CreatedAt { get; set; } = DateTime.UtcNow;
 
