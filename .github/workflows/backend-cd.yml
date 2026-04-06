@@ -104,6 +104,8 @@ jobs:
           helm upgrade --install ingress-nginx ingress-nginx/ingress-nginx \
             --namespace ingress-nginx \
             --create-namespace \
+            --set controller.service.externalTrafficPolicy=Cluster \
+            --set controller.service.annotations."service\.beta\.kubernetes\.io/azure-load-balancer-health-probe-request-path"=/healthz \
             --wait
 
       - name: Deploy backend with Helm (rolling update)
