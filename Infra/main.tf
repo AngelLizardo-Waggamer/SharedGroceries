@@ -30,6 +30,9 @@ resource "random_string" "postgres_suffix" {
   length  = 5
   special = false
   upper   = false
+  keepers = {
+    postgres_location = var.postgres_location
+  }
 }
 
 resource "azurerm_postgresql_flexible_server" "main" {
@@ -71,6 +74,8 @@ resource "azurerm_kubernetes_cluster" "main" {
   resource_group_name = azurerm_resource_group.main.name
   dns_prefix          = "aks-${local.base_name}"
   kubernetes_version  = var.kubernetes_version
+  oidc_issuer_enabled = true
+  workload_identity_enabled = true
   tags                = local.tags
 
   sku_tier = "Free"
