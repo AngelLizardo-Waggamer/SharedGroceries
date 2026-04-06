@@ -21,6 +21,12 @@ variable "postgres_location" {
   default     = "westus"
 }
 
+variable "postgres_zone" {
+  description = "Availability zone for PostgreSQL Flexible Server (set null to let Azure choose)"
+  type        = string
+  default     = null
+}
+
 variable "kubernetes_version" {
   description = "AKS Kubernetes version"
   type        = string
