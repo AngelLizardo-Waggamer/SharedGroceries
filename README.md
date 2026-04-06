@@ -3,7 +3,7 @@
 
 [![backend-ci](https://github.com/AngelLizardo-Waggamer/SharedGroceries/actions/workflows/backend-ci.yml/badge.svg)](https://github.com/AngelLizardo-Waggamer/SharedGroceries/actions/workflows/backend-ci.yml)
 
-[![Deployment](https://github.com/AngelLizardo-Waggamer/SharedGroceries/actions/workflows/backend-cd.yml/badge.svg?branch=master&event=deployment)](https://github.com/AngelLizardo-Waggamer/SharedGroceries/actions/workflows/backend-cd.yml)
+[![backend-cd](https://github.com/AngelLizardo-Waggamer/SharedGroceries/actions/workflows/backend-cd.yml/badge.svg)](https://github.com/AngelLizardo-Waggamer/SharedGroceries/actions/workflows/backend-cd.yml)
 
 ## English
 The reason for this project to be born was the non existing sync between the groceries lists made by my family.
