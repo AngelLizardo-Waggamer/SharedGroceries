@@ -72,7 +72,7 @@ variable "postgres_admin_password" {
 variable "postgres_db_name" {
   description = "Application PostgreSQL database name"
   type        = string
-  default     = "sharedgroceries"
+  default     = "sharedgroceriesdb"
 }
 
 variable "postgres_version" {
