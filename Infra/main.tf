@@ -35,7 +35,7 @@ resource "random_string" "postgres_suffix" {
 resource "azurerm_postgresql_flexible_server" "main" {
   name                   = substr("psql-${local.base_name}-${random_string.postgres_suffix.result}", 0, 63)
   resource_group_name    = azurerm_resource_group.main.name
-  location               = azurerm_resource_group.main.location
+  location               = var.postgres_location
   version                = var.postgres_version
   delegated_subnet_id    = null
   private_dns_zone_id    = null

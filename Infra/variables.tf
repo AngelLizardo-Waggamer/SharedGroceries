@@ -15,6 +15,12 @@ variable "location" {
   default     = "eastus"
 }
 
+variable "postgres_location" {
+  description = "Azure region for PostgreSQL Flexible Server"
+  type        = string
+  default     = "westus"
+}
+
 variable "kubernetes_version" {
   description = "AKS Kubernetes version"
   type        = string
