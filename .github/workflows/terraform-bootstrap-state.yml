@@ -1,0 +1,66 @@
+name: terraform-bootstrap-state
+
+on:
+  workflow_dispatch:
+    inputs:
+      state_resource_group:
+        description: Resource Group for Terraform state
+        required: true
+        default: rg-sharedgroceries-tfstate
+      state_storage_account:
+        description: Globally unique Storage Account name (lowercase)
+        required: true
+        default: stsharedgroceriestfstate
+      state_container:
+        description: Blob container for tfstate
+        required: true
+        default: tfstate
+      location:
+        description: Azure region
+        required: true
+        default: eastus
+
+permissions:
+  id-token: write
+  contents: read
+
+jobs:
+  bootstrap:
+    runs-on: ubuntu-latest
+
+    steps:
+      - name: Azure login (OIDC)
+        uses: azure/login@v2
+        with:
+          client-id: ${{ secrets.AZURE_CLIENT_ID }}
+          tenant-id: ${{ secrets.AZURE_TENANT_ID }}
+          subscription-id: ${{ secrets.AZURE_SUBSCRIPTION_ID }}
+
+      - name: Create state resource group and storage account
+        uses: azure/cli@v2
+        with:
+          inlineScript: |
+            az group create \
+              --name "${{ github.event.inputs.state_resource_group }}" \
+              --location "${{ github.event.inputs.location }}"
+
+            az storage account create \
+              --name "${{ github.event.inputs.state_storage_account }}" \
+              --resource-group "${{ github.event.inputs.state_resource_group }}" \
+              --location "${{ github.event.inputs.location }}" \
+              --sku Standard_LRS \
+              --kind StorageV2
+
+      - name: Create state container
+        uses: azure/cli@v2
+        with:
+          inlineScript: |
+            ACCOUNT_KEY=$(az storage account keys list \
+              --resource-group "${{ github.event.inputs.state_resource_group }}" \
+              --account-name "${{ github.event.inputs.state_storage_account }}" \
+              --query "[0].value" -o tsv)
+
+            az storage container create \
+              --name "${{ github.event.inputs.state_container }}" \
+              --account-name "${{ github.event.inputs.state_storage_account }}" \
+              --account-key "$ACCOUNT_KEY"

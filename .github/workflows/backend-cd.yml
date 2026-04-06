@@ -1,0 +1,132 @@
+name: backend-cd
+
+concurrency:
+  group: backend-cd-${{ github.ref }}
+  cancel-in-progress: true
+
+on:
+  push:
+    branches:
+      - master
+    paths:
+      - BackSharedGroceries/**
+      - .github/workflows/backend-cd.yml
+  workflow_dispatch:
+
+permissions:
+  id-token: write
+  contents: read
+
+env:
+  TF_WORKING_DIR: Infra
+  HELM_CHART_DIR: deploy/helm/backsharedgroceries
+  K8S_NAMESPACE: backsharedgroceries
+
+jobs:
+  build-test-push-deploy:
+    runs-on: ubuntu-latest
+
+    defaults:
+      run:
+        working-directory: BackSharedGroceries
+
+    steps:
+      - name: Checkout repository
+        uses: actions/checkout@v4
+
+      - name: Set up .NET SDK
+        uses: actions/setup-dotnet@v4
+        with:
+          dotnet-version: 8.0.x
+
+      - name: Restore dependencies
+        run: dotnet restore BackSharedGroceries.slnx
+
+      - name: Build solution
+        run: dotnet build BackSharedGroceries.slnx --configuration Release --no-restore
+
+      - name: Run tests
+        run: dotnet test BackSharedGroceries.Tests/BackSharedGroceries.Tests.csproj --configuration Release --verbosity normal
+
+      - name: Azure login (OIDC)
+        uses: azure/login@v2
+        with:
+          client-id: ${{ secrets.AZURE_CLIENT_ID }}
+          tenant-id: ${{ secrets.AZURE_TENANT_ID }}
+          subscription-id: ${{ secrets.AZURE_SUBSCRIPTION_ID }}
+
+      - name: Setup Terraform
+        uses: hashicorp/setup-terraform@v3
+
+      - name: Terraform init for outputs
+        working-directory: ${{ env.TF_WORKING_DIR }}
+        run: |
+          terraform init \
+            -backend-config="resource_group_name=${{ vars.TF_STATE_RESOURCE_GROUP }}" \
+            -backend-config="storage_account_name=${{ vars.TF_STATE_STORAGE_ACCOUNT }}" \
+            -backend-config="container_name=${{ vars.TF_STATE_CONTAINER }}" \
+            -backend-config="key=infra-dev.tfstate"
+
+      - name: Read infrastructure outputs
+        id: infra
+        working-directory: ${{ env.TF_WORKING_DIR }}
+        run: |
+          echo "acr_name=$(terraform output -raw acr_name)" >> "$GITHUB_OUTPUT"
+          echo "acr_login_server=$(terraform output -raw acr_login_server)" >> "$GITHUB_OUTPUT"
+          echo "aks_cluster_name=$(terraform output -raw aks_cluster_name)" >> "$GITHUB_OUTPUT"
+          echo "resource_group_name=$(terraform output -raw resource_group_name)" >> "$GITHUB_OUTPUT"
+          echo "db_connection_string=$(terraform output -raw db_connection_string)" >> "$GITHUB_OUTPUT"
+
+      - name: Build and push image to ACR
+        working-directory: BackSharedGroceries
+        run: |
+          IMAGE_TAG=${{ github.sha }}
+          az acr login --name "${{ steps.infra.outputs.acr_name }}"
+          docker build -t "${{ steps.infra.outputs.acr_login_server }}/backsharedgroceries:${IMAGE_TAG}" -f Dockerfile .
+          docker push "${{ steps.infra.outputs.acr_login_server }}/backsharedgroceries:${IMAGE_TAG}"
+
+      - name: Set AKS context
+        uses: azure/aks-set-context@v4
+        with:
+          resource-group: ${{ steps.infra.outputs.resource_group_name }}
+          cluster-name: ${{ steps.infra.outputs.aks_cluster_name }}
+
+      - name: Setup Helm
+        uses: azure/setup-helm@v4
+
+      - name: Lint Helm chart
+        run: helm lint "${{ env.HELM_CHART_DIR }}"
+
+      - name: Install/upgrade ingress-nginx
+        run: |
+          helm repo add ingress-nginx https://kubernetes.github.io/ingress-nginx
+          helm repo update
+          helm upgrade --install ingress-nginx ingress-nginx/ingress-nginx \
+            --namespace ingress-nginx \
+            --create-namespace \
+            --wait
+
+      - name: Deploy backend with Helm (rolling update)
+        run: |
+          IMAGE_TAG=${{ github.sha }}
+          helm upgrade --install backsharedgroceries "${{ env.HELM_CHART_DIR }}" \
+            --namespace "${{ env.K8S_NAMESPACE }}" \
+            --create-namespace \
+            --set image.repository="${{ steps.infra.outputs.acr_login_server }}/backsharedgroceries" \
+            --set image.tag="${IMAGE_TAG}" \
+            --set-string secrets.DB_CN_STR="${{ steps.infra.outputs.db_connection_string }}" \
+            --set secrets.JWT_KEY="${{ secrets.JWT_KEY }}" \
+            --set env.JWT_ISSUER="${{ secrets.JWT_ISSUER }}" \
+            --set env.JWT_AUDIENCE="${{ secrets.JWT_AUDIENCE }}" \
+            --atomic \
+            --wait
+
+      - name: Verify rollout status
+        run: |
+          kubectl rollout status deployment/backsharedgroceries-backsharedgroceries \
+            -n "${{ env.K8S_NAMESPACE }}" --timeout=180s
+
+      - name: Show ingress endpoint
+        run: |
+          kubectl get svc ingress-nginx-controller -n ingress-nginx
+          kubectl get ingress -n "${{ env.K8S_NAMESPACE }}"

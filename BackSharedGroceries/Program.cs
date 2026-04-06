@@ -10,6 +10,7 @@ var builder = WebApplication.CreateBuilder(args);
 builder.Services.AddControllers();
 builder.Services.AddEndpointsApiExplorer();
 builder.Services.ConfigureSwaggerDocGen();
+builder.Services.AddHealthChecks();
 
 // DbContext configuration
 builder.Services.ConfigureDbContext(builder.Configuration);
@@ -52,6 +53,7 @@ app.UseMiddleware<DeviceSessionMiddleware>();
 
 app.MapControllers();
 app.MapHub<ShoppingListHub>("/hubs/shopping");
+app.MapHealthChecks("/health");
 
 app.Run();
 
