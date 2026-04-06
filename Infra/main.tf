@@ -76,10 +76,10 @@ resource "azurerm_kubernetes_cluster" "main" {
   sku_tier = "Free"
 
   default_node_pool {
-    name                 = "system"
-    node_count           = var.node_count
-    vm_size              = var.node_vm_size
-    os_sku               = "Ubuntu"
+    name                        = "system"
+    node_count                  = var.node_count
+    vm_size                     = var.node_vm_size
+    os_sku                      = "Ubuntu"
     temporary_name_for_rotation = "systemtmp"
     upgrade_settings {
       max_surge = "33%"
@@ -91,7 +91,7 @@ resource "azurerm_kubernetes_cluster" "main" {
   }
 
   network_profile {
-    network_plugin = "kubenet"
+    network_plugin    = "kubenet"
     load_balancer_sku = "standard"
   }
 }
