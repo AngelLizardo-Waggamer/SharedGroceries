@@ -69,14 +69,14 @@ resource "azurerm_postgresql_flexible_server_database" "main" {
 }
 
 resource "azurerm_kubernetes_cluster" "main" {
-  name                = "aks-${local.base_name}"
-  location            = azurerm_resource_group.main.location
-  resource_group_name = azurerm_resource_group.main.name
-  dns_prefix          = "aks-${local.base_name}"
-  kubernetes_version  = var.kubernetes_version
-  oidc_issuer_enabled = true
+  name                      = "aks-${local.base_name}"
+  location                  = azurerm_resource_group.main.location
+  resource_group_name       = azurerm_resource_group.main.name
+  dns_prefix                = "aks-${local.base_name}"
+  kubernetes_version        = var.kubernetes_version
+  oidc_issuer_enabled       = true
   workload_identity_enabled = true
-  tags                = local.tags
+  tags                      = local.tags
 
   sku_tier = "Free"
 
