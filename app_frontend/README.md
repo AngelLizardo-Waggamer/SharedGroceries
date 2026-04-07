@@ -132,22 +132,22 @@ flutter build ios
 ## Español
 
 ### 1. Resumen del Proyecto
-Este repositorio contiene el frontend movil de SharedGroceries, desarrollado con Flutter.
+Este repositorio contiene el frontend móvil de SharedGroceries, desarrollado con Flutter.
 
-La aplicacion esta pensada para soportar flujos de gestion de compras compartidas para familias o grupos, incluyendo:
-- Autenticacion y manejo de sesion.
+La aplicación está pensada para soportar flujos de gestión de compras compartidas para familias o grupos, incluyendo:
+- Autenticación y manejo de sesión.
 - Funcionalidades de familia y perfil.
-- Gestion de listas de compras y productos.
+- Gestión de listas de compras y productos.
 - Actualizaciones en tiempo real mediante SignalR.
 - Persistencia local para datos seleccionados.
 
-Este README esta escrito intencionalmente en un nivel alto y estable para que siga siendo util conforme evolucione el codigo.
+Este README está escrito intencionalmente en un nivel alto y estable para que siga siendo útil conforme evolucione el código.
 
-### 2. Stack Tecnologico (Nivel General)
+### 2. Stack Tecnológico (Nivel General)
 - Framework: Flutter (Dart)
-- Gestion de estado / inyeccion de dependencias: Provider
+- Gestión de estado / inyección de dependencias: Provider
 - Networking: Dio
-- Comunicacion en tiempo real: cliente SignalR
+- Comunicación en tiempo real: cliente SignalR
 - Almacenamiento seguro: flutter_secure_storage
 - Base de datos local: Drift (SQLite)
 
@@ -163,10 +163,10 @@ El codigo sigue una estructura por capas bajo `lib/`.
 - `Theme/`: tema y estilos visuales.
 - `main.dart`: composicion de la app e inyeccion de dependencias.
 
-Durante el inicio, la app inicializa los servicios principales (session manager, API client, cliente en tiempo real, repositorios y base de datos), los expone de forma global y selecciona la ruta inicial segun el estado de autenticacion.
+Durante el inicio, la app inicializa los servicios principales (session manager, API client, cliente en tiempo real, repositorios y base de datos), los expone de forma global y selecciona la ruta inicial según el estado de autenticacion.
 
 ### 4. Prerrequisitos
-Antes de ejecutar el proyecto, asegurate de tener:
+Antes de ejecutar el proyecto, asegúrate de tener:
 - Flutter SDK instalado.
 - Un Dart SDK compatible (gestionado por Flutter).
 - Android Studio y/o VS Code con herramientas de Flutter.
