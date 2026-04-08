@@ -25,7 +25,6 @@ jobs:
   destroy:
     if: github.event.inputs.confirmation == 'DESTROY'
     runs-on: ubuntu-latest
-    environment: ${{ github.event.inputs.environment }}
 
     defaults:
       run:
