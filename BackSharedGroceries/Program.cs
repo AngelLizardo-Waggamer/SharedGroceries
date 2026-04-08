@@ -54,7 +54,7 @@ app.UseMiddleware<DeviceSessionMiddleware>();
 app.MapControllers();
 app.MapHub<ShoppingListHub>("/hubs/shopping");
 app.MapHealthChecks("/health");
-app.MapGet("/test/whoisthis", () => new { WhoIsThis = "BackSharedGroceries", By = "AAHL" });
+app.MapGet("/test/whoisthis", () => new { WhoIsThis = "BackSharedGroceries", By = "AAHL" , Anio = "2025"});
 
 app.Run();
 
