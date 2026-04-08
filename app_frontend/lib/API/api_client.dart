@@ -34,7 +34,7 @@ class ApiClient {
       BaseOptions(
         baseUrl: baseUrl,
         connectTimeout: const Duration(seconds: 5),
-        receiveTimeout: const Duration(seconds: 2),
+        receiveTimeout: const Duration(seconds: 5),
         responseType: ResponseType.json,
       ),
     );
