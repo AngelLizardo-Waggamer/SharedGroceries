@@ -42,5 +42,12 @@ namespace BackSharedGroceries.Interfaces.Services
         /// </summary>
         /// <returns>Service result containing list of product name suggestions.</returns>
         Task<ServiceResult<IEnumerable<string>>> GetProductSuggestionsAsync();
+
+        /// <summary>
+        /// Retrieves all products for a shopping list that belongs to the authenticated user's family.
+        /// </summary>
+        /// <param name="listId">The shopping list ID.</param>
+        /// <returns>Service result containing the list products.</returns>
+        Task<ServiceResult<IEnumerable<ProductResponse>>> GetProductsByListIdAsync(Guid listId);
     }
 }

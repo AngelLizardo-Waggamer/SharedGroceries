@@ -120,5 +120,19 @@ namespace BackSharedGroceries.Repositories
                 .Select(g => g.Key)
                 .ToListAsync();
         }
+
+        /// <summary>
+        /// Retrieves all products for a specific shopping list.
+        /// </summary>
+        /// <param name="listId">The shopping list ID.</param>
+        /// <returns>Collection of products that belong to the shopping list.</returns>
+        public async Task<IEnumerable<Product>> GetProductsByListIdAsync(Guid listId)
+        {
+            return await _context.Products
+                .AsNoTracking()
+                .Where(p => p.ListId == listId)
+                .OrderByDescending(p => p.UpdatedAt)
+                .ToListAsync();
+        }
     }
 }

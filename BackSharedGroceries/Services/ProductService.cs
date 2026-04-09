@@ -359,6 +359,45 @@ namespace BackSharedGroceries.Services
         }
 
         /// <summary>
+        /// Retrieves all products for a shopping list if it belongs to the authenticated user's family.
+        /// </summary>
+        /// <param name="listId">The shopping list ID.</param>
+        /// <returns>Service result containing the list products.</returns>
+        public async Task<ServiceResult<IEnumerable<ProductResponse>>> GetProductsByListIdAsync(Guid listId)
+        {
+            // Get authenticated user ID
+            Guid userId;
+            try
+            {
+                userId = GetUserId();
+            }
+            catch (Exception ex)
+            {
+                return ServiceResult<IEnumerable<ProductResponse>>.Unauthorized(ex.Message);
+            }
+
+            // Get user's family ID
+            var familyId = await _familyRepository.GetUserFamilyIdAsync(userId);
+            if (familyId == null)
+            {
+                return ServiceResult<IEnumerable<ProductResponse>>.BadRequest("User does not belong to a family.");
+            }
+
+            // Validate that the requested list belongs to the user's family
+            var familyListIds = await _productRepository.GetFamilyListIdsAsync(familyId.Value);
+            if (!familyListIds.Contains(listId))
+            {
+                return ServiceResult<IEnumerable<ProductResponse>>.Unauthorized("You do not have permission to access products from this list.");
+            }
+
+            // Retrieve and map products
+            var products = await _productRepository.GetProductsByListIdAsync(listId);
+            var response = products.Select(MapToResponse);
+
+            return ServiceResult<IEnumerable<ProductResponse>>.Ok(response);
+        }
+
+        /// <summary>
         /// Maps a Product entity to a ProductResponse DTO.
         /// </summary>
         /// <param name="product">The product entity.</param>

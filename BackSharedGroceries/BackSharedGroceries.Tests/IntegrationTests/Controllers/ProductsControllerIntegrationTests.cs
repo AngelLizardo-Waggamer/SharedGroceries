@@ -454,6 +454,61 @@ public class ProductsControllerIntegrationTests : IntegrationTestBase
     #region Product Creation and Retrieval Tests
 
     [Fact]
+    public async Task GetProductsByListId_WithValidFamilyList_ReturnsOnlyListProducts()
+    {
+        // Arrange
+        var family = await CreateTestFamilyAsync("TestFamily", "TEST001");
+        var listA = await CreateTestShoppingListAsync(family.FamilyId, "List A");
+        var listB = await CreateTestShoppingListAsync(family.FamilyId, "List B");
+        var deviceId = Guid.NewGuid();
+        var user = await CreateTestUserAsync("testuser", "Password123", family.FamilyId, deviceId);
+
+        var productA1 = await CreateTestProductAsync(listA.Id, "Milk", user.Id);
+        var productA2 = await CreateTestProductAsync(listA.Id, "Bread", user.Id);
+        await CreateTestProductAsync(listB.Id, "Eggs", user.Id);
+
+        var token = TestJwtHelper.GenerateTestToken(user.Id, user.Username, deviceId, family.FamilyId);
+        SetAuthorizationHeader(token);
+
+        // Act
+        var response = await _client.GetAsync($"/api/products/v1/list/{listA.Id}");
+
+        // Assert
+        response.StatusCode.Should().Be(HttpStatusCode.OK);
+
+        var products = await response.Content.ReadFromJsonAsync<List<ProductResponse>>();
+        products.Should().NotBeNull();
+        products.Should().HaveCount(2);
+        products.Should().Contain(p => p.Id == productA1.Id);
+        products.Should().Contain(p => p.Id == productA2.Id);
+        products.Should().OnlyContain(p => p.ListId == listA.Id);
+    }
+
+    [Fact]
+    public async Task GetProductsByListId_FromDifferentFamilyList_ReturnsUnauthorized()
+    {
+        // Arrange
+        var familyA = await CreateTestFamilyAsync("Family A", "FAMA001");
+        var listA = await CreateTestShoppingListAsync(familyA.FamilyId);
+        var deviceIdA = Guid.NewGuid();
+        var userA = await CreateTestUserAsync("userA", "Password123", familyA.FamilyId, deviceIdA);
+        await CreateTestProductAsync(listA.Id, "Milk", userA.Id);
+
+        var familyB = await CreateTestFamilyAsync("Family B", "FAMB001");
+        var deviceIdB = Guid.NewGuid();
+        var userB = await CreateTestUserAsync("userB", "Password123", familyB.FamilyId, deviceIdB);
+
+        var tokenB = TestJwtHelper.GenerateTestToken(userB.Id, userB.Username, deviceIdB, familyB.FamilyId);
+        SetAuthorizationHeader(tokenB);
+
+        // Act
+        var response = await _client.GetAsync($"/api/products/v1/list/{listA.Id}");
+
+        // Assert
+        response.StatusCode.Should().Be(HttpStatusCode.Unauthorized);
+    }
+
+    [Fact]
     public async Task CreateProduct_WithValidData_ReturnsOk()
     {
         // Arrange

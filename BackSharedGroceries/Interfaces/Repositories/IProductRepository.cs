@@ -41,5 +41,12 @@ namespace BackSharedGroceries.Interfaces.Repositories
         /// <param name="familyId">The family ID.</param>
         /// <returns>List of product names ordered by frequency.</returns>
         Task<IEnumerable<string>> GetProductSuggestionsAsync(Guid familyId);
+
+        /// <summary>
+        /// Retrieves all products for a specific shopping list.
+        /// </summary>
+        /// <param name="listId">The shopping list ID.</param>
+        /// <returns>Collection of products that belong to the shopping list.</returns>
+        Task<IEnumerable<Product>> GetProductsByListIdAsync(Guid listId);
     }
 }

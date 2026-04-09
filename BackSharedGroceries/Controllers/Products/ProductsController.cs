@@ -49,6 +49,27 @@ namespace BackSharedGroceries.Controllers.Products
         }
 
         /// <summary>
+        /// Retrieves all products from a shopping list if the list belongs to the authenticated user's family.
+        /// </summary>
+        /// <param name="listId">Shopping list identifier.</param>
+        /// <returns>Collection of products for the requested list.</returns>
+        /// <response code="200">Successfully retrieved products.</response>
+        /// <response code="400">User does not belong to a family.</response>
+        /// <response code="401">The user is not authenticated or list does not belong to the user's family.</response>
+        [HttpGet("v1/list/{listId}")]
+        public async Task<IActionResult> GetProductsByListId(Guid listId)
+        {
+            var result = await _productService.GetProductsByListIdAsync(listId);
+
+            return result.ResultType switch
+            {
+                Common.ServiceResultType.BadRequest => BadRequest(new { message = result.ErrorMessage }),
+                Common.ServiceResultType.Unauthorized => Unauthorized(new { message = result.ErrorMessage }),
+                _ => Ok(result.Data)
+            };
+        }
+
+        /// <summary>
         /// Creates a new product in a shopping list.
         /// </summary>
         /// <param name="dto">Product data to create</param>
